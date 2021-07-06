@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ej.fishingmate.commoncategory.mapper.CommonCategorySQLMapper">
+
+	<!-- 낚시종류 카테고리 불러오기 - 형준 -->
+	<select id="selectFishingCategory" resultType="com.ej.fishingmate.vo.FishingCategoryVO">
+		SELECT * 
+		FROM FM_Fishing_Category
+		ORDER BY Fishing_Category_No
+	</select>
+
+	<!-- 지역(민물) 카테고리 불러오기 - 형준 -->
+	<select id="selectFreshWaterRegionCategory" resultType="com.ej.fishingmate.vo.FreshWaterRegionCategoryVO">
+		SELECT * 
+		FROM FM_Region_Category
+		WHERE region_category_no NOT IN (17, 18, 19)
+		ORDER BY region_category_no
+	</select>
+	
+	<!-- 지역(바다) 카테고리 불러오기 - 형준 -->
+	<select id="selectSeaRegionCategory" resultType="com.ej.fishingmate.vo.SeaRegionCategoryVO">
+		SELECT * 
+		FROM FM_Region_Category
+		WHERE region_category_no IN (17, 18, 19)
+		ORDER BY region_category_no
+	</select>
+	
+	<!-- 지역 카테고리 불러오기 - 형준(글쓰기용) -->
+	<select id="selectRegionCategory" resultType="com.ej.fishingmate.vo.RegionCategoryVO">
+		SELECT * 
+		FROM FM_Region_Category
+		ORDER BY region_category_no
+	</select>
+
+	<!-- 한 지역 정보 불러오기 -->
+	<select id="selectOneRegion" resultType="com.ej.fishingmate.vo.RegionCategoryVO">
+		SELECT *
+		FROM FM_Region_Category
+		WHERE region_category_no = #{region_category_no}
+	</select>
+	
+	<!-- 한 낚시종류 정보 불러오기 -->
+	<select id="selectOneFishing" resultType="com.ej.fishingmate.vo.FishingCategoryVO">
+		SELECT *
+		FROM FM_Fishing_Category
+		WHERE fishing_category_no = #{fishing_category_no}
+	</select>
+
+</mapper>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ej.fishingmate.dice.mapper.DiceSQLMapper">
+
+	<!-- 주사위 테이블 -->
+	<insert id="insertDice">
+	<![CDATA[
+			insert into FM_Dice_Game values (
+	    	FM_Dice_Game_seq.nextval,
+	    	#{member_no},
+	    	#{batting_kinds},
+	    	#{dice_allone},
+	    	#{dice_sum},
+	   	 	#{dice_value},
+	   	 	SYSDATE
+		)
+	]]>
+	</insert>
+
+	<update id="calculateMemberLevelValue">
+		UPDATE FM_MEMBER SET MEMBER_LEVELVALUE = MEMBER_LEVELVALUE + #{value} WHERE member_no = #{member_no}
+	</update>
+
+	<update id="increaseJackPot">
+		UPDATE FM_DICE_JACKPOT_MONEY SET JACKPOT_MONEY = JACKPOT_MONEY + #{value}
+	</update>
+
+	<select id="getMyLevelValue" resultType="int">
+		SELECT MEMBER_LEVELVALUE FROM FM_MEMBER WHERE MEMBER_NO = #{member_no}
+	</select>
+
+	<select id="getCurrentJackpotMoney" resultType="int">
+		SELECT jackpot_money FROM FM_DICE_JACKPOT_MONEY
+	</select>
+
+	<update id="initJackpotMoney">
+		UPDATE FM_DICE_JACKPOT_MONEY SET JACKPOT_MONEY = 0
+	</update>
+
+
+</mapper>

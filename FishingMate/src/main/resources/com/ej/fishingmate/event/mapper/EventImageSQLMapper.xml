@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ej.fishingmate.event.mapper.EventImageSQLMapper">
+	
+	<!-- 축제게시판 이미지등록-주빈 -->
+	<insert id="insertImageEvent">
+		INSERT INTO FM_Event_Freeboard_Image VALUES(
+		    FM_Event_Freeboard_Image_seq.nextval,
+		    #{event_freeboard_no},
+		    #{image_location},
+		    #{image_original_filename}
+		)	
+	</insert>
+	
+	<!-- 게시글 번호로 등록된 이미지 불러오기-주빈 -->
+	<select id="selectByEvntFboardNo" resultType="com.ej.fishingmate.vo.EventImageVO">
+		SELECT * FROM FM_Event_Freeboard_Image 
+		WHERE event_freeboard_no =#{event_freeboard_no}
+	</select>
+
+</mapper>

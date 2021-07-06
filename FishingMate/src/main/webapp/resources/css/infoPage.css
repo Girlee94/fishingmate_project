@@ -1,0 +1,18 @@
+@charset "UTF-8";
+#info_card_list img {
+	width: 286px;
+	height: 200px;
+	cursor: pointer;
+	
+}
+
+#info_cards div {
+	cursor: pointer;
+}
+
+#info_card_list img {
+	width: 286px;
+	height: 350px;
+	cursor: pointer;
+		
+}

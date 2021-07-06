@@ -1,0 +1,41 @@
+@charset "UTF-8";
+
+
+#carouselExampleIndicators{
+    width: 450px;
+	height: 500px;
+}
+#wish_button_color{
+	width: 130px;   
+	height: 50px; 
+
+}
+#textbox_size{
+    width: 565px;
+	height: 200px;
+}
+
+
+.btn-wish {
+    background-color: LightSteelBlue;
+}
+
+.btn-wish:hover{
+	background-color: #9fb7d7;
+}
+
+.btn-wishdark{
+	background-color: #1E3269;
+}
+
+.btn-purchase{
+	background-color: #0064CD;
+}
+
+.btn-commentRegister {
+	background-color: LightSteelBlue;
+}
+
+.btn-evaluate{
+	background-color: #006400
+}

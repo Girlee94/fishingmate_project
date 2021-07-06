@@ -1,0 +1,15 @@
+@charset "UTF-8";
+#list_manager{
+	background: linear-gradient(135deg, turquoise, turquoise 40%, gold);
+	
+}
+
+#list_member{
+	background: linear-gradient(135deg, turquoise, turquoise 40%, gold);
+	
+}
+
+#title_sub{
+	font-size: 30px;
+	
+}

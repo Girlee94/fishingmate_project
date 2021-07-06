@@ -1,0 +1,23 @@
+@charset "UTF-8";
+#all_card_list img {
+	width: 100%;
+	height: 222px;
+}
+
+#latest_cards {
+	cursor: pointer;
+}
+
+#move_listPage {
+	text-decoration: none;
+}
+
+#fishingGame_icons a {
+	text-decoration: none;
+	color: black;
+}
+
+#fishingGame_icons img {
+	width: 100%;
+	height: 220px;
+}

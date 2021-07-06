@@ -1,0 +1,18 @@
+@charset "UTF-8";
+#info_read_thumnail {
+	width: 720px;
+	height: 480px;
+}
+
+#info_read_content {
+	width: 1024px;
+	height: 200px;
+}
+
+#info_comment_form {
+	height: 100px;
+}
+
+#info_comment_form textarea, #mate_comment_updateContent{
+	resize: none;
+}

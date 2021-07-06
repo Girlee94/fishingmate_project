@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ej.fishingmate.mate.mapper.MateSQLMapper">
+	<!-- 게시판 번호 받기 - 형준 -->
+	<select id="createMateFreeboardSequence" resultType="int">
+		SELECT FM_Mate_Freeboard_seq.nextval
+		FROM Dual
+	</select>
+	
+	<!-- 메이트 게시판 글쓰기 - 형준 -->
+	<insert id="insertMateFreeboardContent">
+		INSERT INTO FM_Mate_Freeboard VALUES (
+		    #{mate_freeboard_no},
+		    #{member_no},
+		    1,
+		    #{region_category_no},
+		    #{fishing_category_no},
+		    #{mate_freeboard_title},
+		    #{mate_freeboard_fishingholename},
+		    #{mate_freeboard_content},
+		    0,
+		    SYSDATE,
+		    #{mate_freeboard_postcode},
+		    #{mate_freeboard_roadAddress},
+		    #{mate_freeboard_jibunAddress},
+		    #{mate_freeboard_detailAddress},
+		    #{mate_freeboard_extraAddress},
+		    #{mate_freeboard_startdate},
+		    #{mate_freeboard_enddate},
+		    #{mate_freeboard_maxnumber}
+		)
+	</insert>
+	
+	<!-- 메이트 카테고리 불러오기(1개) - 형준 -->
+	<select id="selectOneMateCategory" resultType="com.ej.fishingmate.vo.MateCategoryVO">
+		SELECT *
+		FROM FM_Mate_Category
+		WHERE mate_category_no = #{mate_category_no}
+	</select>
+	
+	<!-- 메이트 카테고리 불러오기 - 형준 -->
+	<select id="selectAllMateCategory" resultType="com.ej.fishingmate.vo.MateCategoryVO">
+		SELECT *
+		FROM FM_Mate_Category
+		ORDER BY mate_category_no
+	</select>
+	
+	<!-- 메이트 게시판 글목록 불러오기 - 형준 -->
+	<select id="selectMateAllContent" resultType="com.ej.fishingmate.vo.MateFreeboardVO">
+		
+		SELECT *
+		FROM
+		(
+		    SELECT ROWNUM rnum, t1.*
+		    FROM
+		    (
+				SELECT * 
+				FROM FM_Mate_Freeboard
+				<if test="fishing_category_no != 0 or mate_category_no != 0 or region_category_no != 0">
+					<choose>
+						<when test="fishing_category_no != 0 and mate_category_no lte 0 and region_category_no lte 0">
+					 		WHERE fishing_category_no = #{fishing_category_no}
+						</when>
+						<when test="fishing_category_no != 0 and region_category_no != 0 and mate_category_no lte 0">
+							WHERE fishing_category_no = #{fishing_category_no}
+							AND region_category_no = #{region_category_no}
+						</when>
+						<when test="mate_category_no != 0 and fishing_category_no lte 0 and region_category_no lte 0">
+							WHERE mate_category_no = #{mate_category_no}
+						</when>
+						<when test="mate_category_no != 0 and fishing_category_no != 0 and region_category_no lte 0">
+							WHERE fishing_category_no = #{fishing_category_no}
+							AND mate_category_no = #{mate_category_no}
+						</when>
+						<otherwise>
+							WHERE fishing_category_no = #{fishing_category_no}
+							AND region_category_no = #{region_category_no}
+							AND mate_category_no = #{mate_category_no}
+						</otherwise>
+					</choose>
+				</if>
+				ORDER BY mate_freeboard_no DESC
+			)t1
+		)t2
+		<![CDATA[
+		WHERE rnum >= (#{pageNum}-1)*6+1
+		AND rnum <= #{pageNum}*6
+		]]>
+	</select>
+	
+	<!-- 메이트 게시판 글개수 불러오기 - 형준 -->
+	<select id="selectMateAllContentCount" resultType="int">
+		SELECT COUNT(*) 
+		FROM FM_Mate_Freeboard
+		<if test="fishing_category_no != 0 or mate_category_no != 0 or region_category_no != 0">
+			<choose>
+				<when test="fishing_category_no != 0 and mate_category_no lte 0 and region_category_no lte 0">
+			 		WHERE fishing_category_no = #{fishing_category_no}
+				</when>
+				<when test="fishing_category_no != 0 and region_category_no != 0 and mate_category_no lte 0">
+					WHERE fishing_category_no = #{fishing_category_no}
+					AND region_category_no = #{region_category_no}
+				</when>
+				<when test="mate_category_no != 0 and fishing_category_no lte 0 and region_category_no lte 0">
+					WHERE mate_category_no = #{mate_category_no}
+				</when>
+				<when test="mate_category_no != 0 and fishing_category_no != 0 and region_category_no lte 0">
+					WHERE fishing_category_no = #{fishing_category_no}
+					AND mate_category_no = #{mate_category_no}
+				</when>
+				<otherwise>
+					WHERE fishing_category_no = #{fishing_category_no}
+					AND region_category_no = #{region_category_no}
+					AND mate_category_no = #{mate_category_no}
+				</otherwise>
+			</choose>
+		</if>
+	</select>
+	
+	<!-- 메이트 게시판 글읽기 - 형준 -->
+	<select id="selectOneMateContent" resultType="com.ej.fishingmate.vo.MateFreeboardVO">
+		SELECT *
+		FROM FM_Mate_Freeboard
+		WHERE mate_freeboard_no = #{mate_freeboard_no}
+	</select>
+	
+	<!-- 메이트 게시판 조회수 늘리기 - 형준 -->
+	<update id="increaseContentReadCount">
+		UPDATE FM_Mate_Freeboard
+		SET mate_freeboard_readcount = mate_freeboard_readcount + 1
+		WHERE mate_freeboard_no = #{mate_freeboard_no}
+	</update>
+	
+	<!-- 메이트 게시판 글 삭제 - 형준 -->
+	<delete id="deleteMateContentByNo">
+		DELETE FROM FM_Mate_Freeboard
+		WHERE mate_freeboard_no = #{mate_freeboard_no}
+	</delete>
+	
+	<!-- 메이트 게시판 글 수정 - 형준 -->
+	<update id="updateMateContentByNo">
+		UPDATE FM_Mate_Freeboard
+		SET 
+		    region_category_no = #{region_category_no},
+		    fishing_category_no = #{fishing_category_no},
+		    mate_freeboard_title = #{mate_freeboard_title},
+		    mate_freeboard_fishingholename=#{mate_freeboard_fishingholename},
+		    mate_freeboard_content = #{mate_freeboard_content},
+		    mate_freeboard_postcode = #{mate_freeboard_postcode},
+		    mate_freeboard_roadAddress = #{mate_freeboard_roadAddress},
+		    mate_freeboard_jibunAddress = #{mate_freeboard_jibunAddress},
+		    mate_freeboard_detailAddress = #{mate_freeboard_detailAddress},
+		    mate_freeboard_extraAddress = #{mate_freeboard_extraAddress},
+		    mate_freeboard_startdate = #{mate_freeboard_startdate},
+		    mate_freeboard_enddate = #{mate_freeboard_enddate},
+		    mate_freeboard_maxnumber = #{mate_freeboard_maxnumber}
+		WHERE mate_freeboard_no = #{mate_freeboard_no}
+	</update>
+	
+	<!-- 메이트 게시판 댓글쓰기 - 형준 -->
+	<insert id="insertMateFreeboardComment">
+		INSERT INTO FM_Mate_Freeboard_Comment VALUES (
+		    FM_Mate_Freeboard_Comment_seq.nextval,
+		    #{mate_freeboard_no},
+		    #{member_no},
+		    #{mate_comment_content},
+		    SYSDATE
+		)
+	</insert>
+	
+	<!-- 메이트 게시판 댓글 1개 불러오기 - 형준 -->
+	<select id="selectMateOneCommentByNo" resultType="com.ej.fishingmate.vo.MateFreeboardCommentVO">
+		SELECT *
+		FROM FM_Mate_Freeboard_Comment
+		WHERE mate_comment_no = #{mate_comment_no}
+	</select>
+	
+	<!-- 메이트 게시판 댓글 불러오기 - 형준 -->
+	<select id="selectMateAllCommentByNo" resultType="com.ej.fishingmate.vo.MateFreeboardCommentVO">
+		SELECT * 
+		FROM FM_Mate_Freeboard_Comment
+		WHERE mate_freeboard_no = #{mate_freeboard_no}
+		ORDER BY mate_comment_no
+	</select>
+	
+	<!-- 메이트 게시판 댓글 수 불러오기 - 형준 -->
+	<select id="selectMateCommentCountByNo" resultType="int">
+		SELECT COUNT(*) 
+		FROM FM_Mate_Freeboard_Comment
+		WHERE mate_freeboard_no=#{mate_freeboard_no}
+	</select>
+	
+	<!-- 메이트 게시판 댓글 수정 - 형준 -->
+	<update id="updateMateCommentByNo">
+		UPDATE FM_Mate_Freeboard_Comment
+		SET mate_comment_content = #{mate_comment_content}
+		WHERE mate_comment_no = #{mate_comment_no}
+	</update>
+	
+	<!-- 메이트 게시판 댓글 삭제 - 형준 -->
+	<delete id="deleteMateCommentByNo">
+		DELETE FROM FM_Mate_Freeboard_Comment
+		WHERE mate_comment_no = #{mate_comment_no}
+	</delete>
+	
+	<!-- 메이트 게시판 추천 수 올리기 - 형준 -->
+	<insert id="increaseRecommendCount">
+		INSERT INTO FM_Mate_Freeboard_Recommend VALUES (
+		    FM_Mate_FB_Recommend_seq.nextval,
+		    #{mate_freeboard_no},
+		    #{member_no},
+		    SYSDATE
+		)
+	</insert>
+	
+	<!-- 메이트 게시판 추천 수 내리기 - 형준 -->
+	<delete id="decreaseRecommendCount">
+		DELETE FROM FM_Mate_Freeboard_Recommend
+		WHERE mate_freeboard_no = #{mate_freeboard_no}
+		AND member_no = #{member_no}
+	</delete>
+	
+	<!-- 메이트 게시판 추천 여부 확인 - 형준 -->
+	<select id="chkDoRecommend" resultType="int">
+		SELECT COUNT(*) 
+		FROM FM_Mate_Freeboard_Recommend
+		WHERE member_no = #{member_no}
+		AND mate_freeboard_no = #{mate_freeboard_no}
+	</select>
+	
+	<!-- 메이트 게시판 추천 수 불러오기 - 형준 -->
+	<select id="selectMateFreeboardRecommendCount" resultType="int">
+		SELECT COUNT(*)
+		FROM FM_Mate_Freeboard_Recommend
+		WHERE mate_freeboard_no = #{mate_freeboard_no}
+	</select>
+	
+	<!-- 메이트 게시판 그룹 신청하기 - 형준 -->
+	<insert id="insertMateGroup">
+		INSERT INTO FM_Mate_Group VALUES (
+		    FM_Mate_Group_seq.nextval,
+		    #{member_no},
+		    #{mate_freeboard_no},
+		    #{mate_content},
+		    '보류',
+		    SYSDATE
+		)
+	</insert>
+	
+	<!-- 메이트 게시판 그룹 신청 유무 확인 - 형준 -->
+	<select id="chkDoApplyGroup" resultType="int">
+		SELECT COUNT(*) 
+		FROM FM_Mate_Group
+		WHERE member_no = #{member_no}
+		AND mate_freeboard_no = #{mate_freeboard_no}
+	</select>
+	
+	<!-- 메이트 게시판 그룹 신청 현황 불러오기 - 형준 -->
+	<select id="selectMateApplyGroup" resultType="com.ej.fishingmate.vo.MateGroupVO">
+		SELECT * 
+		FROM FM_Mate_Group
+		WHERE mate_freeboard_no = #{mate_freeboard_no}
+	</select>
+	
+	<!-- 메이트 게시판 그룹 신청 현황 인원 수 불러오기 - 형준 -->
+	<select id="selectMateApplyGroupCount" resultType="int">
+		SELECT COUNT(*) 
+		FROM FM_Mate_Group
+		WHERE mate_freeboard_no = #{mate_freeboard_no}
+	</select>
+	
+	<!-- 메이트 게시판 그룹 신청 거절하기 - 형준 -->
+	<update id="denyMateApplyGroup">
+		UPDATE FM_Mate_Group
+		SET mate_approve = '거절'
+		WHERE member_no = #{member_no}
+		AND mate_freeboard_no = #{mate_freeboard_no}
+	</update>
+	
+	<!-- 메이트 게시판 확정 그룹 인원 수 불러오기 - 형준 -->
+	<select id="selectMateConfrimGroupCount" resultType="int">
+		SELECT COUNT(*) 
+		FROM FM_Mate_Confirm
+		WHERE mate_freeboard_no = #{mate_freeboard_no}
+	</select>
+	
+	<!-- 메이트 게시판 확정 그룹에 회원 추가 - 형준 -->
+	<insert id="insertMateConfirmGroup">
+		INSERT INTO FM_Mate_Confirm VALUES (
+		    FM_Mate_Confirm_seq.nextval,
+		    #{mate_freeboard_no},
+		    #{member_no}
+		)
+	</insert>
+	
+	<!-- 메이트 게시판 확정 그룹 추가 시 회원 요청 상태 변경 - 형준 -->
+	<update id="updateApplyGroupApprove">
+		UPDATE FM_Mate_Group
+		SET mate_approve = '승인'
+		WHERE member_no = #{member_no}
+		AND mate_freeboard_no = #{mate_freeboard_no}
+	</update>
+	
+	<!-- 메이트 게시판 확정 그룹에 추가된 회원인지 확인 여부 - 형준 -->
+	<select id="chkMemberIntoMateConfirmGroup" resultType="Integer">
+		SELECT mate_confirm_no
+		FROM FM_Mate_Confirm
+		WHERE member_no = #{member_no}
+		AND mate_freeboard_no = #{mate_freeboard_no}
+	</select>
+	
+	<!-- 메이트 게시판 확정 그룹에서 회원 제거 - 형준 -->
+	<delete id="deleteMateConfirmGroup">
+		DELETE FROM FM_Mate_Confirm
+		WHERE mate_confirm_no = #{mate_confirm_no}
+	</delete>
+	
+	<!-- 메이트 게시판 확정 그룹 제거 시 회원 요청 상태 변경 - 형준 -->	
+	<update id="updateApplyGroupDeny">
+		UPDATE FM_Mate_Group
+		SET mate_approve = '거절'
+		WHERE member_no = #{member_no}
+		AND mate_freeboard_no = #{mate_freeboard_no}
+	</update>
+	
+	<!-- 메이트 게시판 모집 취소 시 모집상태 변경 - 형준 -->
+	<update id="updateMateFreeboardStatusToCancel">
+		UPDATE FM_Mate_Freeboard
+		SET mate_category_no = 3
+		WHERE mate_freeboard_no= #{mate_freeboard_no}
+	</update>
+	
+	<!--======================== 메이트 게시판 모집 완료 시 ==========================-->
+	<!-- 메이트 게시판 모집상태 변경 - 형준  -->
+	<update id="updateMateFreeboardStatusToComplete">
+		UPDATE FM_Mate_Freeboard
+		SET mate_category_no = 2
+		WHERE mate_freeboard_no= #{mate_freeboard_no}
+	</update>
+
+	<!-- 메이트 게시판 확정된 그룹 목록 불러오기 - 형준 -->
+	<select id="selectAllMateConfirmGroup" resultType="com.ej.fishingmate.vo.MateConfirmVO">
+		SELECT *
+		FROM FM_Mate_Confirm
+		WHERE mate_freeboard_no = #{mate_freeboard_no}
+	</select>
+	
+	<!-- 메이트 게시판 회원 간 평가하기(좋아요) - 형준 -->
+	<insert id="evaluateGoodMateMember">
+		INSERT INTO FM_Mate_Evaluate VALUES (
+		    FM_Mate_Evaluate_seq.nextval,
+		    #{mate_confirm_no},
+		    #{to_member_no},
+		    #{from_member_no},
+		    0.3,
+		    #{evaluate_content}
+		)
+	</insert>
+	
+	<!-- 메이트 게시판 회원 간 평가하기(나빠요) - 형준 -->
+	<insert id="evaluateBadMateMember">
+		INSERT INTO FM_Mate_Evaluate VALUES (
+		    FM_Mate_Evaluate_seq.nextval,
+		    #{mate_confirm_no},
+		    #{to_member_no},
+		    #{from_member_no},
+		    -0.3,
+		    #{evaluate_content}
+		)
+	</insert>
+	
+	<!-- 평가한 점수 회원 매너점수에 부여 - 형준 -->
+	<update id="updateEvaluateValueFromMateEvaluate">
+		UPDATE FM_Member_Evaluate
+		SET member_evaluate_value = member_evaluate_value + #{evaluate_value}
+		WHERE member_no = #{to_member_no}
+	</update>
+	
+	<!-- 메이트 게시판 평가여부 확인 - 형준 -->
+	<select id="chkEvaluateToMember" resultType="int">
+		SELECT COUNT(*) FROM FM_Mate_Evaluate
+		WHERE to_member_no = #{to_member_no}
+		AND from_member_no = #{from_member_no}
+		AND mate_confirm_no = #{mate_confirm_no}
+	</select>
+	<!--======================== 메이트 게시판 모집 완료 시 끝 ==========================-->
+	
+	<!--=================== 메이트 게시판 카테고리에 따른 게시글 목록 불러오기 시작 - 형준 ==================-->
+	<!-- 메이트 게시판 모집상태에 따른 게시글 목록 불러오기 - 형준 -->
+	<select id="selectMateContentByMateCategory" resultType="com.ej.fishingmate.vo.MateFreeboardVO">
+		SELECT * 
+		FROM FM_Mate_Freeboard
+		WHERE mate_category_no = #{mate_category_no}
+	</select>
+	
+	
+	<!--=================== 메이트 게시판 카테고리에 따른 게시글 목록 불러오기 끝 ==================-->
+	
+	<!-- 메이트 게시판 찜목록에 넣기 - 형준 -->
+	<insert id="insertMateFreeboardInWishList">
+		INSERT INTO FM_Mate_Wish VALUES (
+		    FM_Mate_Wish_seq.nextval,
+		    #{member_no},
+		    #{mate_freeboard_no}
+		)
+	</insert>
+	
+	<!--========================= 메이트 게시판 찜목록 관련 시작 - 형준 ===============================-->
+	<!-- 메이트 게시판 찜목록에서 제거 - 형준 -->
+	<delete id="deleteMateFreeboardInWishList">
+		DELETE FROM FM_Mate_Wish
+		WHERE member_no = #{member_no}
+		AND mate_freeboard_no = #{mate_freeboard_no}
+	</delete>
+	
+	<!-- 메이트 게시판 찜목록 추가 여부 확인 - 형준 -->
+	<select id="chkInsertIntoWishList" resultType="int">
+		SELECT COUNT(*) 
+		FROM FM_Mate_Wish
+		WHERE member_no = #{member_no}
+		AND mate_freeboard_no = #{mate_freeboard_no}
+	</select>
+	
+	<!-- 메이트 게시판 찜목록 불러오기 - 형준 -->
+	<select id="selectMateWishListByNo" resultType="com.ej.fishingmate.vo.MateWishVO">
+		SELECT *
+		FROM FM_Mate_Wish
+		WHERE member_no = #{member_no}
+		ORDER BY mate_freeboard_no DESC
+	</select>
+	
+	<!--============================= 메이트 게시판 찜목록 관련 끝 ==================================-->
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,7 @@
+@charset "UTF-8";
+#mate_freeboard_frm textarea {
+	height: 200px;
+	resize: none;
+}
+
+

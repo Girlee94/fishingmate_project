@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ej.fishingmate.fishinggame.mapper.FishingGameSQLMapper">
+
+	<!--========================== 낚시터 입장 관련 - 형준 ==============================-->
+	<!-- 낚시터 입장 시 참여자 현황에 회원 추가 - 형준 -->
+	<insert id="insertMemberIntoFishingGame">
+		INSERT INTO FM_FishingGame_JoinMember VALUES (
+		    FM_FishingGame_JoinMember_seq.nextval,
+		    #{member_no},
+		    SYSDATE
+		)
+	</insert>
+	
+	<!-- 낚시터에 입장한 회원인지 확인 - 형준 -->
+	<select id="chkExistFishingGameJoin" resultType="int">
+		SELECT COUNT(*) 
+		FROM FM_FishingGame_JoinMember
+		WHERE member_no = #{member_no}
+	</select>
+
+	<!-- 낚시터 입장한 회원 불러오기 - 형준 -->
+	<select id="selectFishingGameJoinMembers" resultType="com.ej.fishingmate.vo.FishingGameJoinMemberVO">
+		SELECT *
+		FROM FM_FishingGame_JoinMember
+		ORDER BY joinmember_joindate
+	</select>
+	
+	<!-- 낚시터 입장한 회원 수 불러오기 - 형준 -->
+	<select id="selectFishingGameJoinMemberCount" resultType="int">
+		SELECT COUNT(*) 
+		FROM FM_FishingGame_JoinMember
+	</select>
+
+	<!-- 낚시터 퇴장 시 참여자 현황에 회원 제거 - 형준 -->
+	<delete id="deleteMemberFromFishingGame">
+		DELETE FROM FM_FishingGame_JoinMember
+		WHERE member_no = #{member_no}
+	</delete>
+	
+	<!--=========================== 낚시터 입장 관련 끝 ===============================-->
+
+	<!--========================== 채팅 관련 - 형준 ==============================-->
+	<!-- 채팅 입력 시 - 형준 -->
+	<insert id="insertChatContent">
+		INSERT INTO FM_FishingGame_Chatting VALUES (
+		    FM_FishingGame_Chatting_seq.nextval,
+		    #{member_no},
+		    #{chatting_content},
+		    SYSDATE
+		)
+	</insert>
+	
+	<!-- 채팅 목록 불러오기 - 형준 -->
+	<select id="selectChattingList" resultType="com.ej.fishingmate.vo.FishingGameChattingVO">
+		SELECT *
+		FROM
+		(
+		    SELECT ROWNUM rnum, t1.*
+		    FROM
+		    (
+		        SELECT *
+		        FROM FM_FishingGame_Chatting
+		        <![CDATA[
+		        WHERE chatting_no > #{chatting_no}
+		        ]]>
+		        ORDER BY chatting_no DESC
+		    )t1
+		) t2
+		<if test="chatting_no == 0">
+			<![CDATA[
+				WHERE rnum < 19
+			]]>
+		</if>
+	</select>
+
+	<!--============================ 채팅 관련 끝 ===============================-->
+	
+	<!--============================ 구글 차트 이용 잡힌 어종 현황 - 형준 ==============================-->
+	
+	<!-- 어종별 잡힌 횟수 불러오기 - 형준 -->
+	<select id="selectFishCatchCount" resultType="com.ej.fishingmate.vo.FishCatchRateVO">
+		SELECT fgl.fish_no, ff.fish_name, COUNT(fgl.fish_no) catch_count
+		FROM FM_FishingGame_Log fgl, FM_Fish ff
+		WHERE fgl.fish_no = ff.fish_no
+		GROUP BY fgl.fish_no, ff.fish_name
+		ORDER BY fgl.fish_no
+	</select>
+	
+	<!-- test 어종별 잡힌 횟수 불러오기 - 형준 -->
+	<select id="selectFishCatchCount2" resultType="map">
+		SELECT fgl.fish_no, ff.fish_name, COUNT(fgl.fish_no) catch_count
+		FROM FM_FishingGame_Log fgl, FM_Fish ff
+		WHERE fgl.fish_no = ff.fish_no
+		AND TO_CHAR(fgl.log_writedate, 'YYYY-MM-DD') = TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+		GROUP BY fgl.fish_no, ff.fish_name
+		ORDER BY fgl.fish_no
+	</select>
+	
+	<!-- 어종별 잡힌 비율 불러오기 - 형준 -->
+	<select id="selectFishCatchRatio" resultType="map">
+		SELECT *
+		FROM
+		(
+		    SELECT ROWNUM rnum, t1.*
+		    FROM
+		    (
+		        SELECT fgl.fish_no, ff.fish_name, COUNT(fgl.fish_no) catch_count, ROUND((RATIO_TO_REPORT(COUNT(fgl.fish_no)) OVER ())*100, 2) AS catch_ratio
+		        FROM FM_FishingGame_Log fgl, FM_Fish ff
+		        WHERE fgl.fish_no = ff.fish_no
+		        AND TO_CHAR(fgl.log_writedate, 'YYYY-MM-DD') = TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+		        GROUP BY fgl.fish_no, ff.fish_name
+		        ORDER BY catch_ratio DESC
+		    ) t1
+		)t2
+		<![CDATA[
+		WHERE rnum <= 3
+		]]>
+	</select>
+	
+	<!--============================ 구글 차트 이용 잡힌 어종 현황 끝끝 ===============================-->
+	
+	<!--============================ 명화 ===============================-->
+	<!-- 물고기 확률 가져오기 명화 -->
+	<select id="selectProbability" resultType="com.ej.fishingmate.vo.FishingGameProbabilityVO">
+		SELECT fish_no,probability_fish
+		FROM FM_FishingGame_Probability
+	</select>
+	
+	<!-- 물고기 이름 가져오기 명화 -->
+	<select id="selectFishName" resultType="String">
+		select fish_name
+		FROM FM_Fish
+		where fish_no = #{fish_no}
+	</select>
+	
+	<!-- 물고기 번호 가져오기 명화 -->
+	<select id="selectFishNo" resultType="int">
+		select fish_no
+		FROM FM_Fish
+		where fish_name = #{fish_name}
+	</select>
+	
+	<!-- 물고기 길이 가져오기 명화 -->
+	<select id="selectFishLength" resultType="com.ej.fishingmate.vo.FishingGameProbabilityVO">
+		SELECT probability_minlength, probability_maxlength 
+		FROM FM_FishingGame_Probability 
+		WHERE fish_no = 
+			(SELECT Fish_no FROM 
+			 FM_Fish WHERE 
+			 fish_name = #{fish_name}
+			)
+	</select>
+	
+	<!-- 물고기 로그 삽입 명화 -->
+	<insert id="insertFishingGameLog">
+		insert into FM_FishingGame_Log values(
+		FM_fishinggame_log_seq.nextval,
+		#{member_no},
+		#{fish_no},
+		#{log_fishlength},
+		#{log_value},
+		SYSDATE
+		)
+	</insert>
+	<!-- 물고기 로그 불러오기 명화 -->
+	<select id="selectGameLog" resultType="com.ej.fishingmate.vo.FishingGameLogVO">
+		<![CDATA[
+		SELECT * 
+		FROM
+		(
+			SELECT * 
+			FROM FM_fishinggame_log
+			WHERE log_no > #{log_no}
+			]]>
+			<if test="member_no != 0">
+				AND member_no = #{member_no}
+			</if>
+			<![CDATA[
+			ORDER BY log_no desc
+		)
+		]]>
+		<if test="log_no == 0">
+			<![CDATA[
+			WHERE ROWNUM <=10
+			]]> 
+		</if>
+	</select>
+	
+	<!-- 물고기 총합 불러오기 명화 -->
+	<select id="selectTotalFish" resultType="int">
+		SELECT COUNT(*) FROM FM_FishingGame_Log
+		WHERE fish_no != 0
+	</select>
+	
+	<!-- 어종 별 종합 불러오기 명화 -->
+	<select id="selectFish" resultType="int">
+		SELECT COUNT(*) FROM FM_FishingGame_Log where fish_no=#{fish_no}
+	</select>
+	
+	<!-- 경험치 증가 명화 -->
+	<update id="increaseLevelValue">
+		UPDATE fm_member
+		SET	member_levelvalue = member_levelvalue + #{totalScore}
+		WHERE member_no= #{member_no}
+	</update>
+	
+	<!-- 경험치 감소 명화 -->
+	<update id="decreaseLevelValue">
+		UPDATE fm_member
+		SET	member_levelvalue = member_levelvalue - 300
+		WHERE member_no= #{member_no}
+	</update>
+	
+	<!-- 경험치 로그 명화 -->
+	<insert id="insertLevelHistoryLog">
+		insert into FM_levelvalue_history values(
+		FM_Levelvalue_History_seq.nextval,
+		#{levelvalue_category_no},
+		#{member_no},
+		#{history_value},
+		SYSDATE
+		)
+	</insert>
+	
+	<!--================================== 획득&소모한 경험치 조회 ==================================-->
+	
+	<!-- 획득한 경험치 조회 - 형준 -->
+	<select id="selectMyObtainValue" resultType="Double">
+		SELECT SUM(log_value)
+		FROM FM_FishingGame_Log
+		WHERE member_no = #{member_no}
+		AND TO_CHAR(log_writedate, 'YYYY/MM/DD') = TO_CHAR(SYSDATE, 'YYYY/MM/DD')
+	</select>
+	
+	<!-- 낚시하기 한 횟수 조회 - 형준 -->
+	<select id="selectTryFishingCount" resultType="int">
+		SELECT COUNT(*) 
+		FROM FM_FishingGame_Log
+		WHERE member_no = #{member_no}
+		AND TO_CHAR(log_writedate, 'YYYY/MM/DD') = TO_CHAR(SYSDATE, 'YYYY/MM/DD')
+	</select>
+	
+	<!--================================= 획득&소모한 경험치 조회 끝 =================================-->
+	
+	
+	<!-- 무료충전 회수 명화 -->
+	<select id="selectfreeCharging" resultType="int">
+		SELECT COUNT(LevelValue_Category_No)
+		FROM FM_Levelvalue_History 
+		WHERE levelvalue_category_no = 6 
+		AND TO_CHAR(history_date, 'YYYY/MM/DD') = TO_CHAR(SYSDATE, 'YYYY/MM/DD')
+		AND member_no = #{member_no}
+	</select>
+	<!-- top5 명화 -->
+	<select id="selectTopLogValue" resultType="com.ej.fishingmate.vo.FishingGameTopLogVO">
+		<![CDATA[
+		SELECT member_no,ROUND(log_value) log_value 
+		FROM
+		(
+			SELECT member_no,SUM(log_value) log_value
+			FROM FM_FishingGame_Log
+			WHERE TO_CHAR(log_writedate, 'YYYY/MM/DD') = TO_CHAR(SYSDATE, 'YYYY/MM/DD')
+			GROUP BY member_no 
+			ORDER BY 2 DESC
+		)
+		WHERE ROWNUM <=5
+		]]>
+	</select>
+	
+	<!--============================ 명화 끝 =============================-->
+
+
+
+</mapper>

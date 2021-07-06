@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ej.fishingmate.qna.mapper.QnaImageSQLMapper">
+
+<insert id="insert">
+	INSERT INTO fm_qna_freeboard_image values(
+	FM_qna_freeboard_image_seq.nextval,
+	#{qna_freeboard_no},
+	#{image_location},
+	#{image_original_filename}
+	)
+</insert>
+
+
+<select id="selectByqnaFreeboardNo" resultType="com.ej.fishingmate.vo.QnaImageVO">
+	SELECT *
+	FROM FM_qna_freeboard_image
+	WHERE qna_freeboard_no =#{qna_freeboard_no}
+</select>
+
+
+<insert id="updateContentImage">
+	INSERT INTO fm_qna_freeboard_image values(
+	FM_qna_freeboard_image_seq.nextval,
+	#{qna_freeboard_no},
+	#{image_location},
+	#{image_original_filename}
+	)		
+</insert>
+
+
+<delete id="deleteContentImage">
+	DELETE 
+	FROM
+		fm_qna_freeboard_image
+	WHERE
+		image_no =#{image_no}		
+
+</delete>
+
+
+</mapper>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ej.fishingmate.fishshare.mapper.FishingShareSQLMapper">
+
+<!-- 멤버 정보 가져오기 명화 -->
+	<select id="memberSelectByNo" resultType="com.ej.fishingmate.vo.MemberVO">
+		SELECT * 
+		FROM FM_Member
+		WHERE member_no=#{member_no}
+	</select>
+<!-- 구매 하기 명화 -->
+	<insert id="byefishshare">
+		INSERT INTO FM_fishshare_Storage VALUES(
+    	FM_fishshare_Storage_seq.nextval,
+   		#{member_no},
+    	#{fish_no},
+    	#{fishshare_storage_quantity},
+ 	    SYSDATE)
+	</insert>
+<!-- 구매 하기2 명화 -->
+	<update id="updatefishshare">
+		UPDATE FM_fishshare_Storage
+		SET	fishshare_storage_quantity = fishshare_storage_quantity + #{fishshare_storage_quantity}
+		WHERE member_no= #{member_no} AND fish_no= #{fish_no}
+	</update>
+<!-- 판매 하기 명화 -->
+	<update id="salefishshare">
+		UPDATE FM_fishshare_Storage
+		SET	fishshare_storage_quantity = fishshare_storage_quantity - #{fishshare_storage_quantity}
+		WHERE member_no= #{member_no} AND fish_no= #{fish_no}
+	</update>
+<!-- 경험치 감소 명화 -->
+	<update id="decreasefishshare">
+		UPDATE fm_member
+		SET	member_levelvalue = member_levelvalue - #{fishshare_storage_value}
+		WHERE member_no= #{member_no}
+	</update>
+<!-- 물고기 보유 현황 명화 -->
+	<select id="selectfishcount" resultType="com.ej.fishingmate.vo.FishShareCountVO">
+	select fish_no,sum(fishshare_storage_quantity) fishshare_storage_quantity 
+	from FM_fishshare_Storage 
+	where member_no = #{member_no}
+	GROUP BY fish_no
+	</select>
+<!-- 경험치 증가 명화 -->
+	<update id="addfishshare">
+		UPDATE fm_member
+		SET	member_levelvalue = member_levelvalue + #{fishshare_storage_value}
+		WHERE member_no= #{member_no}
+	</update>
+<!-- 물고기 구매 확인 명화 -->
+	<select id ="checkFishShare" resultType="int">
+		select count(fishshare_storage_quantity) 
+		from FM_fishshare_Storage where fish_no = #{fish_no} 
+		AND member_no = #{member_no}
+	</select>
+<!-- 물고기 보유 확인 명화 -->
+	<select id ="checkFish" resultType="Integer">
+		select fishshare_storage_quantity
+		from FM_fishshare_Storage where fish_no = #{fish_no}
+		AND member_no = #{member_no}
+	</select>
+<!-- 물고기 보유 테이블 삭제 명화 -->
+	<delete id ="deleteFish">
+		DELETE from FM_fishshare_Storage
+		WHERE member_no = #{member_no} AND fish_no=#{fish_no}
+	</delete>
+<!-- 주식 로그 삽입 명화 -->
+	<insert id ="insertFishLog">
+		INSERT INTO FM_fishshare_Log VALUES(
+    	FM_fishshare_log_seq.nextval,
+    	#{member_no},
+    	#{fishshare_category_no},
+    	#{fish_no},
+    	#{fishshare_log_value},
+    	#{fishshare_quantity},
+ 	    SYSDATE)
+ 	</insert>
+ <!-- 주식 로그 불러오기 명화 -->
+ 	<select id="selectFishLog" resultType="com.ej.fishingmate.vo.FishShareLogVO">
+		<![CDATA[
+		SELECT * 
+		FROM
+		(
+			SELECT * 
+			FROM FM_fishshare_Log
+			WHERE fishshare_log_no > #{fishshare_log_no}
+			]]>
+			<if test="member_no != 0">
+				AND member_no = #{member_no}
+			</if>
+			<![CDATA[
+			ORDER BY fishshare_log_no desc
+		)
+		]]>
+		<if test="fishshare_log_no == 0">
+			<![CDATA[
+			WHERE ROWNUM <=10
+			]]> 
+		</if>
+	</select>
+<!-- 주식 차트2 명화 -->
+	<select id="selectFishCatchCount3" resultType="map">
+	SELECT t1.*, sysdate
+	FROM
+	(
+	    SELECT fgl.Fish_no, mf.fish_name, ROUND((RATIO_TO_REPORT(COUNT(fgl.fish_no)) OVER ())*100, 2) AS catch_count
+		FROM FM_FishingGame_Log fgl, FM_Fish mf
+		WHERE fgl.fish_no = mf.fish_no
+		<if test="isGetAll == true">
+			AND (SYSDATE - log_writedate)*24*60 > #{no}
+		</if>
+		AND fgl.fish_no != 0
+		GROUP BY fgl.Fish_no, mf.fish_name
+		ORDER BY fgl.fish_no
+	)t1
+	</select>
+	
+	<!--  -->
+</mapper>

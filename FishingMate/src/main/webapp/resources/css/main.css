@@ -1,0 +1,41 @@
+@charset "UTF-8";
+
+#festival{
+/* 	font-family: 'Source Sans Pro', sans-serif;  */
+	font-size: 50px;
+	color: #000080;
+}
+
+
+#eventbttm{
+	text-align: right;
+}
+
+#eventpgnation{
+	text-align: center;
+}
+
+#eventpgnation ul{
+	align-items: center;
+}
+
+#fnewsposting {
+/* 	font-family: 'Source Sans Pro', sans-serif;  */
+	font-size: 50px;
+	color: #000080;
+}
+
+#fpostingb {
+/* 	font-family: 'Source Sans Pro', sans-serif;  */
+	font-size: 50px;
+	color: #1a1a1a
+}
+
+#updatefestivM {
+/* 	font-family: 'Source Sans Pro', sans-serif;  */
+	font-size: 50px;
+	color: #000080;
+}
+
+
+

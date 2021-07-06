@@ -1,0 +1,39 @@
+@charset "UTF-8";
+#mateTitleSpanBox {
+	cursor: pointer;
+}
+
+@charset "UTF-8";
+#mate_read_thumnail {
+	width: 720px;
+	height: 480px;
+}
+
+#mate_read_content {
+	width: 1024px;
+	height: 200px;
+}
+
+#mate_comment_form {
+	height: 100px;
+}
+
+#mate_comment_form textarea, #mate_comment_updateContent{
+	resize: none;
+}
+
+#recommend_btn, #wishlist_btn {
+	cursor: pointer;
+}
+
+#mate_read_content_form {
+	background-color: #F0FFF0;
+}
+
+#mate_content_form{
+	height: 100px;
+}
+
+#mate_content_form textarea{
+	resize: none;
+}

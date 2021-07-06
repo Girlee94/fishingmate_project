@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ej.fishingmate.main.mapper.MainSQLMapper">
+	
+	<!-- 자랑게시판 최신글 3개 불러오기 -->
+	<select id="latestSelectShowOffContent" resultType="map">
+	<![CDATA[	
+		SELECT t1.showoff_freeboard_no freeboard_no, t1.showoff_freeboard_title freeboard_title
+        FROM
+        (
+	        SELECT *
+	        FROM FM_Showoff_Freeboard
+	        ORDER BY Showoff_Freeboard_no DESC
+        )t1
+        WHERE ROWNUM <=3
+	]]>
+	</select>
+	
+	<!-- 메이트게시판 최신글 3개 불러오기 -->
+	<select id="latestSelectMateContent" resultType="map">
+	<![CDATA[	
+		SELECT t1.mate_freeboard_no freeboard_no, t1.mate_freeboard_title freeboard_title
+        FROM
+        (
+	        SELECT *
+	        FROM FM_Mate_Freeboard
+	        ORDER BY mate_freeboard_no DESC
+        )t1
+        WHERE ROWNUM <=3
+	]]>
+	</select>
+	
+	<!-- Q&A 게시판 최신 3개글 불러오기 -->
+	<select id="selectLatestQnaContent" resultType="map">
+		SELECT *
+		FROM
+		(
+		    SELECT qf.qna_freeboard_no, qf.qna_freeboard_title, qf.qna_freeboard_writedate, qc.qna_category_name
+		    FROM FM_Qna_Freeboard qf, FM_Qna_Category qc
+		    WHERE qf.qna_category_no = qc.qna_category_no
+		    ORDER BY qf.qna_freeboard_no DESC
+		)t1
+		<![CDATA[
+		WHERE ROWNUM < 4
+		]]>
+	</select>
+	
+	<!-- 게시판 종류별 최신 3개글 불러오기 -->
+	<!-- 1 => 메이트, 2 => 정보, 3 => 리뷰, 4 => Q&A, 5 => 중고거래, 6 => 이벤트, 7 => 자랑 -->
+	<select id="latestSelectContent" resultType="map">
+		<choose>
+			<!-- 메이트 게시판-->
+			<when test="freeboard_type == 1">
+				SELECT t1.mate_freeboard_no freeboard_no, t1.mate_freeboard_title freeboard_title
+		        FROM
+		        (
+			        SELECT *
+			        FROM FM_Mate_Freeboard
+			        ORDER BY mate_freeboard_no DESC
+		        )t1
+			</when>
+			
+			<!-- 정보 게시판 -->
+			<when test="freeboard_type == 2">
+				SELECT t1.info_freeboard_no freeboard_no, t1.info_freeboard_title freeboard_title
+		        FROM
+		        (
+			        SELECT *
+			        FROM FM_Info_Freeboard
+			        ORDER BY info_freeboard_no DESC
+		        )t1
+			</when>
+			
+			<!-- 리뷰 게시판 -->
+			<when test="freeboard_type == 3">
+				SELECT t1.review_freeboard_no freeboard_no, t1.review_freeboard_title freeboard_title
+		        FROM
+		        (
+			        SELECT *
+			        FROM FM_Review_Freeboard
+			        ORDER BY review_freeboard_no DESC
+		        )t1
+			</when>
+			
+			<!-- Q&A 게시판 -->
+			<!-- 
+			<when test="freeboard_type == 4">
+				SELECT t1.qna_freeboard_no freeboard_no, t1.qna_freeboard_title freeboard_title
+		        FROM
+		        (
+			        SELECT *
+			        FROM FM_Qna_Freeboard
+			        ORDER BY qna_freeboard_no DESC
+		        )t1
+			</when> -->
+			
+			<!-- 중고거래 게시판 -->
+			<when test="freeboard_type == 4">
+				SELECT t1.trade_freeboard_no freeboard_no, t1.trade_freeboard_title freeboard_title
+		        FROM
+		        (
+			        SELECT *
+			        FROM FM_Trade_Freeboard
+			        ORDER BY trade_freeboard_no DESC
+		        )t1
+			</when>
+			
+			<!-- 이벤트 게시판 -->
+			<!-- 
+			<when test="freeboard_type == 6">
+				SELECT t1.event_freeboard_no freeboard_no, t1.event_freeboard_title freeboard_title
+		        FROM
+		        (
+			        SELECT *
+			        FROM FM_Event_Freeboard
+			        ORDER BY event_freeboard_no DESC
+		        )t1
+			</when> -->
+			
+			<!-- 자랑 게시판 -->
+			<when test="freeboard_type == 0">
+				SELECT t1.showoff_freeboard_no freeboard_no, t1.showoff_freeboard_title freeboard_title
+		        FROM
+		        (
+			        SELECT *
+			        FROM FM_Showoff_Freeboard
+			        ORDER BY showoff_freeboard_no DESC
+		        )t1
+			</when>
+		</choose>
+		<![CDATA[
+		WHERE ROWNUM <=3
+		]]>
+	</select>
+	
+	<!-- 이미지 게시판 종류별 이미지 불러오기 -->
+	<!-- 1 => 메이트, 2 => 정보, 3 => 리뷰, 4 => Q&A, 5 => 중고거래, 6 => 이벤트, 7 => 자랑 -->
+	<select id="latestSelectContentImage" resultType="map">
+		SELECT * 
+		<choose>
+			<!-- 메이트 게시판 -->
+			<when test="freeboard_type == 1">
+				FROM FM_Mate_Freeboard_Image 
+				WHERE mate_freeboard_no=#{freeboard_no}
+			</when>
+			
+			<!-- 정보 게시판 -->
+			<when test="freeboard_type == 2">
+				FROM FM_Info_Freeboard_Image 
+				WHERE info_freeboard_no=#{freeboard_no}
+			</when>
+			
+			<!-- 리뷰 게시판 -->
+			<when test="freeboard_type == 3">
+				FROM FM_Review_Freeboard_Image 
+				WHERE review_freeboard_no=#{freeboard_no}
+			</when>
+			
+			<!-- Q&A 게시판 -->
+			<!-- <when test="freeboard_type == 4">
+				FROM FM_Qna_Freeboard_Image 
+				WHERE qna_freeboard_no=#{freeboard_no}
+			</when> -->
+			
+			<!-- 중고거래 게시판 -->
+			<when test="freeboard_type == 4">
+				FROM FM_Trade_Freeboard_Image 
+				WHERE trade_freeboard_no=#{freeboard_no}
+			</when>
+			
+			<!-- 이벤트 게시판 -->
+			<!-- <when test="freeboard_type == 6">
+				FROM FM_Event_Freeboard_Image 
+				WHERE event_freeboard_no=#{freeboard_no}
+			</when> -->
+			
+			<!-- 자랑 게시판 -->
+			<when test="freeboard_type == 0">
+				FROM FM_Showoff_Freeboard_Image 
+				WHERE showoff_freeboard_no=#{freeboard_no}
+			</when>
+		</choose>
+		
+	</select>
+
+</mapper>

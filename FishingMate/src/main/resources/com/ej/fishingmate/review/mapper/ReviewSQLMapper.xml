@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ej.fishingmate.review.mapper.ReviewSQLMapper">
+	
+	<!-- 리뷰 게시글 삽입 정진 -->
+	<insert id="insert">
+	<![CDATA[
+		INSERT INTO FM_Review_Freeboard VALUES(
+		    #{review_freeboard_no},
+		    #{member_no},
+		    #{review_freeboard_title},
+		    #{review_freeboard_content},
+		    0,
+		    SYSDATE
+		)	
+	]]>
+	</insert>
+	
+	<!-- 리뷰 게시판 정진 -->
+	<select id="reviewAll" resultType="com.ej.fishingmate.vo.ReviewVO">
+	<![CDATA[
+		SELECT * 
+		FROM FM_Review_Freeboard 
+		ORDER BY review_freeboard_no DESC
+	]]>
+	
+	</select>
+	
+	
+	<!-- 리뷰 게시글 불러오기 정진 -->
+	<select id="reviewByNo" resultType="com.ej.fishingmate.vo.ReviewVO">
+		SELECT * 
+		FROM FM_Review_Freeboard
+		WHERE review_freeboard_no = #{no}	
+	</select>
+	
+	<!-- 리뷰 게시글 삭제 -->
+	<delete id="reviewDeleteByNo">
+		DELETE 
+		FROM FM_Review_Freeboard 
+		WHERE review_freeboard_no = #{no}	
+	</delete>
+	
+	<!-- 리뷰 게시글 수정 -->
+	<update id="reviewUpdateContent">
+		UPDATE FM_Review_Freeboard
+		SET review_freeboard_title = #{review_freeboard_title},
+			review_freeboard_content = #{review_freeboard_content}
+		WHERE review_freeboard_no = #{review_freeboard_no}	
+	</update>
+	
+	<!-- 리뷰게시판 댓글 삽입 -->
+	<insert id="reviewInsertComment">
+		INSERT INTO FM_Review_Freeboard_Comment VALUES(
+		FM_Review_Fb_Comment_seq.nextval,
+		#{review_freeboard_no},
+		#{member_no},
+		#{review_comment_content},
+		SYSDATE
+		)	
+	</insert>
+	
+	<!-- 게시글 번호 생성 -->
+	<select id ="createReviewKey" resultType="int">
+		SELECT
+		FM_Review_Freeboard_seq.nextval 
+		FROM DUAL
+	</select>
+	
+	<!-- 게시판 조회수 -->
+	<update id="reviewUpdateReadCount">
+		UPDATE FM_Review_Freeboard
+		SET review_freeboard_readcount = review_freeboard_readcount + 1
+		WHERE review_freeboard_no = #{review_freeboard_no}	
+	</update>
+	
+	<!-- 게시판 글 갯수 -->
+	<select id="reviewContentCount" resultType="int">
+		SELECT COUNT(*)
+		FROM FM_Review_Freeboard
+	</select>
+	
+	<!-- 리뷰 게시글 번호로 댓글 찾기 -->
+	<select id="reviewCommentByFreeboardNo" resultType="com.ej.fishingmate.vo.ReviewCommentVO">
+		SELECT *
+		FROM FM_Review_Freeboard_Comment
+		WHERE review_freeboard_no = #{review_freeboard_no}
+	</select>
+	
+	<!-- 리뷰게시판 댓글 불러오기 -->
+	<select id="reviewContentCommentByNo" resultType="com.ej.fishingmate.vo.ReviewCommentVO">
+		SELECT *
+		FROM FM_Review_Freeboard_Comment
+		WHERE review_freeboard_no = #{no}
+	</select>
+	
+	<!-- 리뷰 게시판 댓글 수정 -->
+	<update id="reviewModifyCommentByMnoAndCno">
+		UPDATE FM_Review_Freeboard_Comment
+		SET review_comment_content = #{review_comment_content}
+		<!-- WHERE member_no = #{member_no} -->
+		WHERE review_comment_no = #{review_comment_no} 	
+	</update>
+	
+	<!-- 댓글 1개 불러오기 -->
+	<select id="reviewSelectCommentByMnoAndCno" resultType="com.ej.fishingmate.vo.ReviewCommentVO">
+		SELECT *
+		FROM FM_Review_Freeboard_Comment
+		WHERE member_no = #{member_no}
+		AND review_comment_no = #{review_comment_no}
+	</select>
+	
+	<!-- 리뷰게시판 댓글 삭제 -->
+	<delete id="reviewDeleteCommentByNo">
+		DELETE
+		FROM FM_Review_Freeboard_Comment
+		WHERE review_comment_no = #{no}
+	</delete>
+	
+	<!-- 리뷰게시판 댓글 수 -->
+	<select id="reviewSelectCommentCountByNo" resultType="int">
+		SELECT COUNT(*)
+		FROM FM_Review_Freeboard_Comment
+		WHERE review_freeboard_no = #{no}
+	
+	</select>
+	
+	<!-- 리뷰 게시판 추천수 올리기 -->
+	<insert id="upRecommendCount">
+		INSERT INTO FM_Review_Freeboard_Recommend VALUES (
+		    FM_Review_Fb_Recommend_seq.nextval,
+		    #{review_freeboard_no},
+		    #{member_no},
+		    SYSDATE
+		)
+	</insert>
+	
+	<!-- 리뷰 게시판 추천수 내리기 -->
+	<delete id="downRecommendCount">
+		DELETE FROM FM_Review_Freeboard_Recommend
+		WHERE review_freeboard_no = #{review_freeboard_no}
+		AND member_no = #{member_no}
+	</delete>
+	
+	<!-- 리뷰 게시판 추천 여부 확인 -->
+	<select id="checkRecommend" resultType="int">
+		SELECT COUNT(*) 
+		FROM FM_Review_Freeboard_Recommend
+		WHERE member_no = #{member_no}
+		AND review_freeboard_no = #{review_freeboard_no}
+	</select>
+	
+	<!-- 리뷰 게시판 추천수 불러오기 -->
+	<select id="selectReviewRecommendCount" resultType="int">
+		SELECT COUNT(*)
+		FROM FM_Review_Freeboard_Recommend
+		WHERE review_freeboard_no = #{review_freeboard_no}
+	</select>
+	
+	
+	
+	
+	
+</mapper>

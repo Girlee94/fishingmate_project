@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ej.fishingmate.infofreeboard.mapper.InfoFreeboardImageSQLMapper">
+
+<insert id="insert">
+	INSERT INTO fm_info_freeboard_image values(
+	FM_info_freeboard_image_seq.nextval,
+	#{info_freeboard_no},
+	#{image_location},
+	#{image_original_filename}
+	)
+</insert>
+
+<select id="selectByinfoFreeboardNo" resultType="com.ej.fishingmate.vo.InfoFreeboardImageVO">
+	SELECT *
+	FROM FM_info_freeboard_image
+	WHERE info_freeboard_no =#{info_freeboard_no}
+</select>
+
+<insert id="updateContentImage">
+	INSERT INTO fm_info_freeboard_image values(
+	FM_info_freeboard_image_seq.nextval,
+	#{info_freeboard_no},
+	#{image_location},
+	#{image_original_filename}
+	)		
+</insert>
+
+<delete id="deleteContentImage">
+	DELETE 
+	FROM
+		fm_info_freeboard_image
+	WHERE
+		image_no =#{image_no}		
+
+</delete>
+
+
+
+</mapper>

@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ej.fishingmate.member.mapper.MemberSQLMapper">
+	
+	<!-- 회원번호 받기 - 형준  -->
+	<select id="createMemberSequence" resultType="int">
+		SELECT FM_Member_seq.nextval
+		FROM Dual
+	</select>
+	
+	<!-- 회원가입 테이블 - 정진 -->
+	<insert id="insertMember">
+		INSERT INTO FM_Member 
+		VALUES(
+		    #{member_no},
+		    1,
+    		#{member_id},
+    		#{member_pw},
+    		#{member_name},
+    		#{member_nick},
+    		#{member_gender},
+		    #{member_birth},
+    		#{member_phone},
+    		#{member_email},
+    		SYSDATE,
+    		0,
+		    #{member_roadAddress}, 
+ 		    #{member_jibunAddress},
+ 		    #{member_detailAddress}, 
+ 	  	    #{member_extraAddress}
+		)
+	
+	</insert>
+	
+	<!-- 회원가입 시 회원 평가테이블에 기본정보 입력 - 형준 -->
+	<insert id="insertDefaultMemberEvaluate">
+		INSERT INTO FM_Member_Evaluate VALUES (
+		    FM_Member_Evaluate_seq.nextval,
+		    #{member_no},
+		    5,
+		    SYSDATE
+		)
+	</insert>
+	
+	<!-- 로그인 - 규석 -->
+	<select id="selectByIdAndPw" resultType="com.ej.fishingmate.vo.MemberVO">
+		SELECT * 
+		FROM FM_Member 
+		WHERE member_id = #{id} 
+		AND member_pw = #{pw}
+	</select>
+	
+	
+	<!-- 멤버 불러오는 부분 하나로 합치기 -->
+	<!-- 특정 회원 정보 가져오기 - 형준 -->
+	<select id="selectMemberByMno" resultType="com.ej.fishingmate.vo.MemberVO">
+		SELECT *
+		FROM FM_Member
+		WHERE member_no = #{member_no}
+	</select>
+	
+	<!-- 정보리스트 - 규석&명화&성호&수희 -->
+	<select id="memberSelectByNo" resultType="com.ej.fishingmate.vo.MemberVO">
+		SELECT * 
+		FROM FM_Member 
+		WHERE member_no=#{member_no}
+	</select>
+	
+	<!-- 리뷰 게시글 불러오기 - 정진 -->
+	<select id="reviewByNo" resultType="com.ej.fishingmate.vo.MemberVO">
+		SELECT * 
+		FROM FM_Member
+		WHERE member_no = #{no}	
+	</select>
+	
+	<!--회원번호로 멤버VO 불러오기-주빈  -->
+	<select id="selectByNo" resultType="com.ej.fishingmate.vo.MemberVO">
+		SELECT * 
+		FROM FM_Member
+		WHERE member_no=#{member_no}
+	</select>
+	
+	<!-- 멤버 불러오는 부분 하나로 합치기 -->
+	
+	<!-- 회원 나이 구하기 - 형준 -->
+	<select id="selectMemberAge" resultType="int">
+		SELECT SUBSTR(TRUNC(MONTHS_BETWEEN(
+                TRUNC(SYSDATE, 'YEAR'), TRUNC(TO_DATE(member_birth, 'YYYY-MM-DD'), 'YEAR')
+            )/12 + 1), 3) as age
+		FROM FM_Member
+		WHERE member_no = #{member_no}
+	</select>
+	
+	<!-- 2번관리자 정보 찾기 - 주빈 -->
+	<select id="selectAdm2" resultType="com.ej.fishingmate.vo.ManagerVO">
+		SELECT * 
+		FROM FM_Manager
+		WHERE manager_no=2
+	</select>
+	
+	<!-- 회원 매너 점수 불러오기 - 형준 -->
+	<select id="selectMemberEvaluate" resultType="com.ej.fishingmate.vo.MemberEvaluateVO">
+		SELECT * 
+		FROM FM_Member_Evaluate
+		WHERE member_no = #{member_no}
+	</select>	
+	<!-- 친구신청-주빈 -->
+	<insert id="insertFriend">
+		INSERT INTO FM_Member_Friend VALUES(
+		    FM_Member_Friend_seq.nextval,
+		    0,
+		    #{me_no},
+		    #{you_no},		    
+		    'D',
+		    SYSDATE
+		)
+	</insert>
+
+	<!-- 닉네임으로 친구검색-주빈 -->
+	<select id="selectMemberNick" resultType="com.ej.fishingmate.vo.MemberVO">
+		SELECT * 
+		FROM FM_Member
+		WHERE member_nick=#{member_nick}
+		AND member_nick!=#{myNick}
+						
+	</select>
+	
+	<!-- 이름으로 친구검색-주빈 -->
+	<select id="selectMemberName" resultType="com.ej.fishingmate.vo.MemberVO">
+		SELECT * 
+		FROM FM_Member
+		WHERE member_name=#{member_name}
+		AND member_name!=#{myName}                     
+				    
+	</select>
+	
+	<!-- 친구신청 수락-주빈 -->
+	<update id="updateFriendConfirm">
+		UPDATE FM_Member_Friend
+		SET friend_confirm = 'Y'
+		WHERE (me_no=#{member_no} AND you_no=#{member_no2})
+		OR (me_no=#{member_no2} AND you_no=#{member_no})
+	</update>
+	
+	<!-- 친구신청 거절-주빈 -->
+	<delete id="updateFriendRejection">
+	<!-- 
+		DELETE FROM FM_Member_Friend
+		WHERE friend_no =#{friend_no}
+	 -->
+ 		UPDATE FM_Member_Friend
+		SET friend_confirm = 'N'
+		WHERE friend_no =#{friend_no}
+	</delete>
+	
+	<!-- 친구리스트-주빈 -->
+	<select id="selectFriendList" resultType="com.ej.fishingmate.vo.MemberFriendVO">
+		SELECT * FROM FM_Member_Friend
+		WHERE me_no=#{member_no}
+		OR you_no=#{member_no}
+	</select>
+	
+	<!-- 확정된 친구리스트-주빈 -->
+	<select id="selectConfirmedFriendList" resultType="com.ej.fishingmate.vo.MemberFriendVO">
+		SELECT * FROM FM_Member_Friend
+		WHERE (me_no=#{member_no} OR you_no=#{member_no}) 
+		AND friend_confirm='Y'
+	</select>
+	<!-- 확정된 친구리스트-주빈 -->
+	<select id="selectConfirmedFriendListByGroupNo" resultType="com.ej.fishingmate.vo.MemberFriendVO">
+		SELECT * FROM FM_Member_Friend
+		WHERE (me_no=#{member_no} OR you_no=#{member_no}) 
+		AND friend_confirm='Y'
+		AND friend_group_no = #{group_no}
+	</select>
+		
+	<!-- 보낸친구요청(자기가 보낸 것)-주빈 -->
+	<select id="selectMeNo" resultType="com.ej.fishingmate.vo.MemberFriendVO">
+		SELECT * FROM FM_Member_Friend
+		WHERE me_no=#{me_no}
+		AND friend_confirm != 'Y'
+	</select>
+	                                                                 
+	<!-- 받은친구요청(자기가 받은 것)-주빈 -->
+	<select id="selectYouNo" resultType="com.ej.fishingmate.vo.MemberFriendVO">
+		SELECT * FROM FM_Member_Friend
+		WHERE you_no=#{you_no}
+		AND friend_confirm != 'Y'
+	</select>
+	
+	<!-- 검색결과 친구요청 수락여부-주빈 -->
+	<select id="selectFriendConfirm" resultType="String">
+		SELECT friend_confirm FROM FM_Member_Friend 
+		WHERE (me_no=#{member_no} AND you_no=#{member_no2}) 
+		OR (me_no=#{member_no2} AND you_no=#{member_no})
+	</select>
+	
+	<!-- 친구정보-주빈 -->
+	<select id="selectFriendByFriendNo" resultType="com.ej.fishingmate.vo.MemberFriendVO">
+		SELECT * FROM FM_Member_Friend
+		WHERE friend_no=#{friend_no}
+	</select>
+	
+	<!-- 친구그룹 생성-주빈 -->
+	<insert id="insertFrndGroup">
+		INSERT INTO FM_Friend_Group VALUES(
+		    FM_Friend_Group_seq.nextval,
+		    #{member_no},
+		    #{friend_group_name},
+		    SYSDATE
+		)
+	</insert>
+	
+	<!-- 친구그룹 전체(자기가 만든 것) 불러오기-주빈 -->
+	<select id="selectAllGroup" resultType="com.ej.fishingmate.vo.MemberFriendGroupVO">
+		SELECT * FROM FM_Friend_Group 
+		WHERE member_no=#{member_no}
+	</select>
+	
+	<!-- 친구그룹 이름 불러오기-주빈 -->
+	<select id="selectGroupName" resultType="com.ej.fishingmate.vo.MemberFriendVO">
+		SELECT friend_group_name 
+		FROM FM_Friend_Group 
+		WHERE friend_group_no=#{friend_group_no}
+	</select>
+	
+	<!-- 친구그룹 이름 수정-주빈 -->
+	<update id="updateGroupName">
+		UPDATE FM_Friend_Group
+		SET friend_group_name =#{friend_group_name}
+		WHERE friend_group_no=#{friend_group_no}
+	</update>
+	
+	<!-- 친구그룹 변경-주빈 -->
+	<update id="updateGroupSet">
+		UPDATE FM_Member_Friend
+		SET friend_group_no=#{friend_group_no}
+		WHERE friend_no=#{friend_no}
+	</update>
+	
+	<!-- 메세지 -->
+	<!-- 회원 쪽지보내기(보낸 것 확인(?))-주빈 -->
+	<insert id="insertSendMessage">
+		INSERT INTO FM_Member_SendMessage VALUES(
+		    FM_Member_SendMessage_seq.nextval,
+		    #{from_member_no},
+			#{to_member_no},
+			#{message_content},
+		    SYSDATE,
+		    null,
+			'N' 
+		)
+	</insert>
+	
+	<!-- 받은 메세지함-주빈 -->
+	<select id="selectInbox" resultType="com.ej.fishingmate.vo.MemberSendMessageVO">
+		SELECT * FROM FM_Member_SendMessage
+		WHERE to_member_no=#{to_member_no}
+	</select>
+	
+	<!-- 보낸 메세지함-주빈 -->
+	<select id="selectSendMsg" resultType="com.ej.fishingmate.vo.MemberSendMessageVO">
+		SELECT * FROM FM_Member_SendMessage
+		WHERE from_member_no=#{from_member_no}
+	</select>
+		
+	<!-- 받은 쪽지 본문 새창 읽기-주빈 -->
+	<select id="selectInboxContent" resultType="com.ej.fishingmate.vo.MemberSendMessageVO">
+		SELECT * 
+		FROM FM_Member_SendMessage
+		WHERE sendmessage_no=#{sendmessage_no}
+		AND to_member_no=#{to_member_no}
+	</select>
+		
+	<!-- 보낸 쪽지 본문 새창 읽기-주빈  -->
+	<select id="selectSendContent" resultType="com.ej.fishingmate.vo.MemberSendMessageVO">
+		SELECT * 
+		FROM FM_Member_SendMessage
+		WHERE sendmessage_no=#{sendmessage_no}
+		AND from_member_no=#{from_member_no}
+	</select>
+		
+	<!-- 쪽지 읽기/수신확인(?)-주빈 -->
+	<update id="updateReadCheck">
+		UPDATE FM_Member_Sendmessage
+		SET message_readcheck='Y' , message_readdate=SYSDATE
+		WHERE sendmessage_no =#{sendmessage_no}
+	</update>
+	
+	<!-- 쪽지 삭제-주빈 -->
+	<delete id="deleteMessage" parameterType="int">
+		DELETE FROM FM_Member_Sendmessage
+		WHERE sendmessage_no IN 
+			<foreach collection="array" item="arr" open="(" close=")" separator=",">
+				#{arr}
+			</foreach>
+	</delete>
+	
+	<!-- 로또 점수 업데이트 -->
+	<update id="updatelottolevelvalue">
+		UPDATE fm_member
+		SET member_levelvalue = member_levelvalue+ #{member_levelvalue}
+	 	WHERE member_no =#{member_no}
+	
+	</update>
+	
+	<!-- 로또 구매마다 10000포인트 감소하기 -->
+	<update id="buylotto">
+		UPDATE fm_member
+		SET member_levelvalue = member_levelvalue-10000
+	 	WHERE member_no =#{member_no}
+	</update>
+	
+	
+	<insert id="updatelevelhistory">
+	INSERT INTO FM_levelvalue_history VALUES(
+		FM_levelvalue_history_seq.nextval,
+		7,
+		#{member_no},
+		#{history_value},
+		SYSDATE
+	)
+	<!--카테고리 합칠때옮기자 -->
+	</insert>
+	<select id="todayfreelottocount" resultType="int">
+	SELECT COUNT(*) from fm_levelvalue_history
+	WHERE levelvalue_category_no = 7
+	AND member_no =#{member_no}
+	AND TO_CHAR(history_date, 'YYYY/MM/DD') = TO_CHAR(SYSDATE, 'YYYY/MM/DD')
+	</select>
+		<insert id="updatechargehistory">
+		INSERT INTO FM_levelvalue_history VALUES(
+		FM_levelvalue_history_seq.nextval,
+		8,
+		#{member_no},
+		#{history_value},
+		SYSDATE
+	)
+	</insert>
+	
+	<!-- 당첨 몇개 맞췄는지랑 거기에따른 벨류 넘겨주기 -->
+		<update id="updatelottouserwon">
+		UPDATE fm_lotto_user
+		SET won_sutza =#{won_sutza},
+			won =#{won}
+		WHERE lotto_no = #{lotto_no}	
+			
+					
+		<!-- 	
+	 	WHERE member_no =#{member_no}
+	 	AND lotto_round = #{lotto_round}
+	 	 -->
+	</update>
+	
+</mapper>	
+
+
+
+
+
+
+
+
+
+
+
+
+
+

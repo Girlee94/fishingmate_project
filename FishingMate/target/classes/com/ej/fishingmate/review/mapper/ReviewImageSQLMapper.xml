@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ej.fishingmate.review.mapper.ReviewImageSQLMapper">
+	
+	<insert id="reviewImageInsert">
+	<![CDATA[
+		INSERT INTO FM_Review_Freeboard_Image VALUES(
+		   	FM_Review_Fb_Image_seq.nextval,
+		    #{review_freeboard_no},
+		    #{image_location},
+		    #{image_original_filename}
+		)
+	]]>		
+	</insert>
+	
+	<select id="reviewSelectByFreeboardNo" resultType="com.ej.fishingmate.vo.ReviewImageVO">
+		SELECT *
+		FROM FM_Review_Freeboard_Image
+		WHERE review_freeboard_no = #{review_freeboard_no}	
+	</select>
+	
+	<delete id="imageDelete">
+		DELETE 
+		FROM FM_Review_Freeboard_Image
+		WHERE review_freeboard_no = #{review_freeboard_no}
+	</delete>
+
+
+</mapper>

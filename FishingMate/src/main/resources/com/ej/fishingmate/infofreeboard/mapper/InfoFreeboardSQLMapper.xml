@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ej.fishingmate.infofreeboard.mapper.InfoFreeboardSQLMapper">
+	
+	
+	 <!-- 정보 게시글 번호생성 -->
+ 	<select id="createinfoFreeboardKey" resultType="int">
+ 		SELECT FM_info_freeboard_seq.nextval from dual
+ 	</select>
+	
+	<!-- 정보 게시글 등록 -->
+	<insert id="insertInfoFreeboardContent">
+		<![CDATA[
+		INSERT INTO FM_Info_freeboard VALUES(
+			#{info_freeboard_no},
+			#{member_no},
+			#{info_category_no},
+			#{info_freeboard_title},
+			#{info_freeboard_content},
+			#{info_freeboard_readcount},
+			SYSDATE
+		)
+		]]>
+	</insert>
+	
+	<select id="selectAll" resultType="int">
+	
+		SELECT fb.info_freeboard_no
+		FROM FM_info_freeboard fb, Info_CategoryList cg 
+		WHERE fb.info_freeboard_no = cg.info_freeboard_no
+		AND cg.info_category_no = #{info_category_no}
+		ORDER BY cg.info_freeboard_no desc
+	
+	</select>
+	
+	<select id="selectAllList" resultType="int">
+	
+		SELECT info_freeboard_no
+		FROM Fm_info_freeboard
+		ORDER BY info_freeboard_no DESC
+	
+		
+	</select>
+	<!--게시글 수  -->
+	<select id="InfoFreeboardTotalNo" resultType="int">
+		SELECT COUNT(*) FROM FM_Info_Freeboard
+	</select>
+	<!-- 카테고리 정보 가져오기  -->
+	<select id="selectCategoryName" resultType="string">
+	   SELECT freeboard_category_name FROM FM_Info_Category WHERE info_category_no=#{info_category_no}
+	</select>
+	<!--  정보 게시글 불러오기 -->
+	<select id="selectinfoContentByNo" resultType="com.ej.fishingmate.vo.InfoFreeboardVO">
+		SELECT *
+		FROM FM_info_Freeboard
+		WHERE info_freeboard_no = #{info_freeboard_no}
+	
+	</select>
+	<!-- 정보 게시글 수정 -->
+	<update id="updateinfoContent">
+	
+		UPDATE 
+			fm_info_freeboard
+		
+		SET
+			info_freeboard_title= #{info_freeboard_title},
+			info_freeboard_content= #{info_freeboard_content}
+			
+		WHERE
+			info_freeboard_no = #{info_freeboard_no}
+	
+	</update>
+	
+	<!-- 정보 게시글 삭제 -->
+	<delete id="deleteinfoContent">
+		DELETE
+		FROM fm_info_freeboard
+		WHERE info_freeboard_no =#{info_freeboard_no}
+	
+	</delete>
+    <!-- 추천 관련 -->
+    
+   <select id="selectRecommendCountByFreeboardNoAndMemberNo" resultType="int">
+		SELECT COUNT(*) 
+		FROM FM_info_Freeboard_Recommend 
+		WHERE info_freeboard_no = #{info_freeboard_no} 
+		AND member_no = #{member_no}
+	</select>
+	<!--추천 삭제  -->
+	<delete id="deleteRecommend">
+		DELETE FROM FM_info_Freeboard_Recommend 
+		WHERE info_freeboard_no = #{info_freeboard_no} 
+		AND member_no = #{member_no}
+	</delete>
+	
+	 <insert id="insertRecommend">
+		INSERT INTO Fm_info_Freeboard_Recommend VALUES(
+	    Fm_info_Fb_Recommend_seq.nextval,
+    	#{info_freeboard_no},
+	    #{member_no},
+	    SYSDATE
+		)
+     </insert>
+     
+	<select id="selectRecommendCountByinfoFreeboardNo" resultType="int">
+		SELECT COUNT(*)
+		FROM FM_info_freeboard_recommend
+		WHERE info_freeboard_no=#{info_freeboard_no}
+	
+	</select>
+
+	<!-- 추천 관련끗 -->
+
+	<!-- 댓글 삽입 -->
+	<insert id="insertinfoComment">
+	   INSERT INTO FM_info_freeboard_comment values(
+	   FM_info_freeboard_comment_seq.nextval,
+	   #{info_freeboard_no},
+	   #{member_no},
+	   #{info_comment_content},
+	   SYSDATE
+	   )
+   
+   </insert>
+
+	 <!-- 댓글 수정 -->
+   <update id="updateinfoCommentByMnoAndCno">
+   		UPDATE FM_info_freeboard_comment
+		SET info_comment_content = #{info_comment_content}
+	<!-- 	WHERE member_no = #{member_no} -->
+		WHERE info_comment_no = #{info_comment_no}
+   </update>
+   
+   <!-- 댓글 삭제 -->
+   <delete id="deleteinfoComment">
+		DELETE 
+		FROM FM_info_freeboard_comment
+		where member_no = #{member_no} and info_comment_no =#{info_comment_no}
+   </delete>
+   
+   <delete id="deleteinfoCommentByFno">
+		DELETE FROM FM_Info_Freeboard_Comment
+		WHERE info_comment_no = #{info_comment_no}
+	</delete>
+   
+   
+   <!-- 댓글 갯수 목록 -->
+   <select id="commentCount" resultType="int">
+	select count(comment_no)
+	from tj_freeboard_comment where freeboard_no= #{freeboard_no}
+	</select>
+   <!-- 댓글 1개 불러오기 -->
+   <select id="selectCommentByMnoAndCno" resultType="com.ej.fishingmate.vo.InfoFreeboardCommentVO">
+	   	SELECT * 
+		FROM FM_info_freeboard_comment
+		WHERE member_no= #{member_no} 
+		AND info_comment_no = #{info_comment_no}
+   </select>
+   
+   
+    <!-- 댓글ajax 1개 불러오기 -->
+   <select id="selectInfoOneCommentByNo" resultType="com.ej.fishingmate.vo.InfoFreeboardCommentVO">
+	  	SELECT *
+		FROM FM_info_Freeboard_Comment
+		WHERE info_comment_no = #{info_comment_no}
+   </select>
+   
+   
+   
+   <!-- 댓글 전체 불러오기 -->
+   <select id="selectinfoAllCommentContentByNo" resultType="com.ej.fishingmate.vo.InfoFreeboardCommentVO">
+   		SELECT * 
+		FROM FM_info_freeboard_comment
+		WHERE info_freeboard_no = #{info_freeboard_no}
+   </select>
+
+	
+	<select id="selectCommentCountByNo" resultType="int">
+		SELECT COUNT(*)
+		FROM FM_info_freeboard_comment
+		WHERE info_freeboard_no=#{info_freeboard_no}
+	
+	</select>
+	<!-- 카테고리 검색 -->
+	
+	<select id="selectCategoryList" resultType="com.ej.fishingmate.vo.InfoCategoryVO">
+		SELECT * FROM FM_info_category
+	</select>
+
+
+	<select id="selectCategoryByNo" resultType="com.ej.fishingmate.vo.InfoCategoryVO">
+	 	SELECT * 
+	 	FROM FM_info_category
+	 	WHERE info_category_no =#{info_category_no}
+	
+	</select>
+	
+	<insert id="insertInfoCategoryList">
+		INSERT INTO Info_CategoryList VALUES(
+			Info_CategoryList_seq.nextval, 
+			#{info_category_no}, 
+			#{info_freeboard_no}
+		)
+	</insert>
+
+
+	<!-- <select id="selectCategoryByFreeboardNo" resultType="int">
+	SELECT info_freeboard_no
+	FROM info_categorylist
+	WHERE info_category_no =#{info_category_no}
+	
+	</select> -->
+
+<!-- 추천 여부 확인 ajax -->
+	<select id="checkdoRecommend" resultType="int">
+	SELECT COUNT(*)
+	FROM FM_info_freeboard_recommend
+	WHERE member_no=#{member_no}
+	AND info_freeboard_no =#{info_freeboard_no}
+	
+	</select>
+
+
+	<!-- 읽은 수 증가 -->
+	<update id="updateinforeadcount">
+	UPDATE fm_info_freeboard
+	SET info_freeboard_readcount = info_freeboard_readcount +1
+	WHERE info_freeboard_no = #{info_freeboard_no}
+	
+	</update>
+
+	<!-- 로또 -->
+	<insert id="insertLottoNo">
+	INSERT INTO FM_LOTTO VALUES(
+	fm_lotto_seq.nextval,
+	#{lotto_no}
+	)
+	</insert>
+	
+	
+	<!-- 로또 서비스 회차 별 랜덤번호 없데이트 -->
+	<update id="updatelottoserver">
+	UPDATE fm_lotto_server
+	SET 
+		lotto_round = #{lotto_round},
+		lotto_num1 = #{lotto_num1},
+		lotto_num2 = #{lotto_num2},
+		lotto_num3 = #{lotto_num3},
+		lotto_num4 = #{lotto_num4},
+		lotto_num5 = #{lotto_num5},
+		lotto_num6 = #{lotto_num6},
+		lotto_round_date = SYSDATE
+	WHERE 
+		lotto_round =  (SELECT MAX(lotto_round)
+		FROM fm_lotto_server)
+	</update>
+	
+	<!-- 로또 서비스 다음 라운드 널값 생성 -->
+	<insert id="insertnextround">
+	INSERT INTO FM_LOTTO_SERVER VALUES(
+	fm_lotto_server_seq.nextval,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	SYSDATE
+	)
+	</insert>
+	
+	<!-- 배팅 로또 서비스 로또 구매 하기 -->
+	<insert id="buylottowithselectedNumber">
+	INSERT INTO FM_LOTTO_USER VALUES(
+	fm_lotto_user_seq.nextval,
+	#{lotto_round},
+	#{member_no},
+	#{lotto_num1},
+	#{lotto_num2},
+	#{lotto_num3},
+	#{lotto_num4},
+	#{lotto_num5},
+	#{lotto_num6},	
+    10000,
+    0,
+    0
+	)
+	</insert>
+	
+	<!--  현재 라운드 구하기 -->
+	<select id="selectCurrentRound" resultType="int">
+		SELECT MAX(lotto_round)
+		FROM fm_lotto_Server
+	</select>
+
+<!-- 배팅 로또 서비스 현재 라운드 구하기 -->
+<select id="selectnowlottoround" resultType="int">
+	SELECT lotto_round 
+	FROM fm_lotto_server 
+	WHERE lotto_round =(select MAX(lotto_round) from fm_lotto_server)
+</select>
+
+<!-- 배팅정보 가져오기 -->
+<select id="getmyallinfo" resultType="com.ej.fishingmate.vo.LottoUserVO">
+	SELECT *
+	FROM fm_lotto_user
+	WHERE member_no = #{member_no}
+	ORDER BY LOTTO_ROUND DESC
+</select>
+
+<select id="selectnumberbyroundandmemberno" resultType="com.ej.fishingmate.vo.LottoUserVO">
+SELECT *
+FROM fm_lotto_user
+WHERE lotto_round = (select MAX(lotto_round) from fm_lotto_server)
+
+
+</select>
+
+<select id="getNextTime" resultType="com.ej.fishingmate.vo.LottoServerVO">
+	SELECT lotto_round_date 
+	FROM fm_lotto_server 
+	WHERE lotto_round =(select MAX(lotto_round) from fm_lotto_server)
+</select>
+<!-- 로또 벨류 히스토리 가져오기 -->
+<select id="mylottovalue" resultType="int">
+	SELECT history_value
+	FROM FM_levelvalue_history
+	WHERE member_no = #{member_no}
+	AND LEVELVALUE_CATEGORY_NO = 8
+</select>
+
+
+</mapper>

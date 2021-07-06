@@ -1,0 +1,11 @@
+@charset "UTF-8";
+#main_content, #quick_menu, header {
+	background-repeat : no-repeat;
+	background-size : cover;
+	font-family: 'Cute Font', cursive;
+	font-size: 20px;
+} 
+
+#fishinggame_title{
+	font-size: 130px;
+}

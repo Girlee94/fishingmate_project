@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ej.fishingmate.event.mapper.EventSQLMapper">
+
+	<select id="createEventKey" resultType="int">
+		SELECT FM_Event_Freeboard_seq.nextval 
+		FROM Dual	
+	</select>
+
+	<!-- 축제 게시판 글 입력- 주빈 -->
+	<insert id="insertEvent">
+		INSERT INTO FM_Event_Freeboard VALUES(
+		    #{event_freeboard_no},
+		    #{member_no},
+		    2,
+		    #{event_freeboard_title},
+		    #{event_freeboard_content},
+		    #{event_freeboard_startdate},
+		    #{event_freeboard_enddate},
+		    0,
+		    SYSDATE,
+		    'N'
+		)
+	</insert>
+
+	<!-- 축제 게시판 글 전체 리스트 불러오기- 주빈 -->
+	<select id="selectEventAll" resultType="com.ej.fishingmate.vo.EventVO">
+		SELECT * FROM FM_Event_Freeboard 
+		ORDER BY event_freeboard_no DESC
+	</select>
+	
+	<!-- 이벤트 게시판 조회수 올리기 -주빈 -->
+	<update id="updateEventReadCount">
+		UPDATE FM_Event_Freeboard 
+		SET event_freeboard_readcount = event_freeboard_readcount+1 
+		WHERE event_freeboard_no=#{event_freeboard_no}
+	</update>
+
+	<!-- 축제 글 작성자 수정- 주빈 -->
+	<update id="updateEventMember">
+		UPDATE FM_Event_Freeboard
+		SET event_freeboard_title=#{event_freeboard_title}, event_freeboard_content=#{event_freeboard_content}
+		WHERE event_freeboard_no=#{event_freeboard_no}
+	</update>
+
+	<!-- 축제 글 관리자 승인/수정- 주빈 -->
+	<update id="updateEventManager">
+		UPDATE FM_Event_Freeboard
+		SET event_freeboard_approve='Y', event_freeboard_content=#{event_freeboard_content}
+		WHERE event_freeboard_no=#{event_freeboard_no}
+	</update>
+
+	<!-- 축제 글 일반회원용 리스트 불러오기- 주빈 -->
+	<select id="selectEventByApp" resultType="com.ej.fishingmate.vo.EventVO">
+		SELECT * FROM FM_Event_Freeboard 
+		WHERE event_freeboard_no = #{event_freeboard_no}
+		ORDER BY event_freeboard_no DESC
+	</select>
+
+	<!-- 축제글 읽기- 주빈 -->
+	<select id="selectByNo" resultType="com.ej.fishingmate.vo.EventVO">
+		SELECT * FROM FM_Event_Freeboard
+		WHERE event_freeboard_no=#{event_freeboard_no}
+	</select>
+	
+	<!-- 진행중 이벤트 검색 - 주빈 -->
+	<select id="selectNowEvent" resultType="com.ej.fishingmate.vo.EventVO">
+		SELECT * FROM FM_Event_Freeboard 
+		WHERE SYSDATE BETWEEN event_freeboard_startdate AND event_freeboard_enddate
+	</select>
+	
+	<!-- 예정된 이벤트 검색 - 주빈 -->
+	<select id="selectFrontEvent" resultType="com.ej.fishingmate.vo.EventVO">
+		SELECT * FROM FM_Event_Freeboard 
+		<![CDATA[
+		WHERE SYSDATE < event_freeboard_startdate
+		]]>
+	</select>
+	
+	<!-- 종료된 이벤트 검색 - 주빈 -->
+	<select id="selectBackEvent" resultType="com.ej.fishingmate.vo.EventVO">
+		SELECT * FROM FM_Event_Freeboard 
+		<![CDATA[
+		WHERE SYSDATE > event_freeboard_enddate
+		]]>
+	</select>
+	
+	<!-- 이벤트 게시글 추천(좋아요)- 주빈 -->
+	<insert id="insertRecommend">
+		INSERT INTO FM_Event_Recommend VALUES(
+			FM_Event_Recommend_seq.nextval,
+			#{event_freeboard_no},
+			#{member_no},
+			SYSDATE
+		)
+	</insert>
+	
+	<!-- 이벤트 게시글 좋아요 해제- 주빈 -->
+	<delete id="deleteRecommend">
+		DELETE FROM FM_Event_Recommend 
+		WHERE event_freeboard_no= #{event_freeboard_no}
+		AND member_no=#{member_no}
+	</delete>
+	
+	<!-- 자기가 누른 이벤트 게시글 좋아요 수 카운트 -주빈 -->
+	<select id="selectMyRecommendCount" resultType="int">
+		SELECT COUNT(*) 
+		FROM FM_Event_Recommend 
+		WHERE member_no=#{member_no} 
+		AND event_freeboard_no=#{event_freeboard_no}
+	</select>
+	
+	<!-- 이벤트 게시글 당 좋아요 전체 수 - 주빈  -->
+	<select id="selectRecommendCount" resultType="int">
+		SELECT COUNT(*) 
+		FROM FM_Event_Recommend 
+		WHERE event_freeboard_no=#{event_freeboard_no}
+	</select>
+	
+	<!-- 이벤트 위시리스트 인서트 -주빈 -->
+	<insert id="insertWishlist">
+		INSERT INTO FM_Event_Wishlist VALUES(
+			FM_Event_Wishlist_seq.nextval,
+		    #{event_freeboard_no},
+		    #{member_no},
+		    SYSDATE
+		)
+	</insert>
+	
+	<!-- 이벤트 위시리스트 해제 -주빈 -->
+	<delete id="deleteWishlist">
+		DELETE FROM FM_Event_Wishlist
+		WHERE event_freeboard_no=#{event_freeboard_no}
+		AND member_no=#{member_no}
+	</delete>
+	
+	<!-- 이벤트 게시글 당 자기가 찜 했는지 여부 확인 - 주빈 -->
+	<select id="selectMyWishlistCount" resultType="int">
+		SELECT COUNT(*)
+		FROM FM_Event_Wishlist
+		WHERE member_no=#{member_no}
+		AND event_freeboard_no=#{event_freeboard_no}
+	</select>
+	
+	<!-- 게시글당 총 찜 개수 카운트 -주빈 -->
+	<select id="selectWishlistCount" resultType="int">
+		SELECT COUNT(*)
+		FROM FM_Event_Wishlist
+		WHERE event_freeboard_no=#{event_freeboard_no}
+	</select>
+	
+	<!-- 자기가 찜한 위시리스트 목록 -주빈-->
+	<select id="selectMyWishlist" resultType="com.ej.fishingmate.vo.EventWishlistVO">
+		SELECT * FROM FM_Event_Wishlist
+		WHERE member_no=#{member_no}
+	</select>
+	
+	
+</mapper>

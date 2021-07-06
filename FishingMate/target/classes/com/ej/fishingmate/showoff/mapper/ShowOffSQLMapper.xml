@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ej.fishingmate.showoff.mapper.ShowOffSQLMapper">
+	<!-- 게시글 번호 생성 명화-->
+<select id ="createFreeboardKey" resultType="int">
+		select FM_Showoff_fb_seq.nextval from dual
+	</select>
+	<!--자랑게시판 게시글 삽입 명화 -->
+<insert id="insert">
+	<![CDATA[		
+		INSERT INTO FM_Showoff_Freeboard VALUES(
+		    #{showoff_freeboard_no},
+		    #{member_no},
+		    #{fish_no},
+		    #{showoff_freeboard_title},
+		    #{showoff_freeboard_content},
+		    0,
+		    SYSDATE,
+		    #{showoff_freeboard_levelvalue},
+		    #{showoff_freeboard_fishlength}
+		)					
+	]]>
+	</insert>
+	<!-- 자랑게시판 이미지 삽입 명화 -->
+	<insert id="imageinsert">
+		INSERT INTO FM_Showoff_freeboard_image values(
+		   	 FM_Showoff_Fb_image_seq.nextval,
+		     #{showoff_freeboard_no},
+		    #{image_location},
+		    #{image_original_filename}
+		)
+	</insert>
+	<!-- 자랑게시판 글 삭제 명화 -->
+	 <delete id="deleteContent">
+		DELETE 
+		FROM FM_Showoff_freeboard
+		WHERE showoff_freeboard_no = #{freeboard_no} 
+   </delete>
+   <!-- 자랑게시판 글 수정 명화 -->
+	<update id="updateContent">
+		UPDATE 
+			FM_showoff_Freeboard 
+		SET 
+			showoff_freeboard_title = #{showoff_freeboard_title}, 
+			showoff_freeboard_content = #{showoff_freeboard_content},
+			showoff_freeboard_fishlength = #{showoff_freeboard_fishlength},
+			fish_no =#{fish_no},
+			showoff_freeboard_levelvalue = #{showoff_freeboard_levelvalue}
+		WHERE 
+			showoff_freeboard_no = #{showoff_freeboard_no}
+	</update>
+   	<!-- 자랑게시판 이미지 삭제 -->
+   <delete id="imageDelete">
+		DELETE FROM FM_Showoff_freeboard_image
+		WHERE showoff_freeboard_no = #{freeboard_no}
+	</delete>
+	<!-- 자랑게시판 글 불러오기  명화 -->
+	<select id="selectContentByNo" resultType="com.ej.fishingmate.vo.ShowOffVO">
+		SELECT *
+		FROM FM_Showoff_Freeboard
+		WHERE showoff_freeboard_no = #{no}
+	</select>
+	<!-- 자랑게시판 경험치 불러오기  명화 -->
+	<select id="selectlevelvalue" resultType="double">
+		SELECT showoff_freeboard_levelvalue
+		FROM FM_Showoff_Freeboard
+		WHERE showoff_freeboard_no = #{no}
+	</select>
+	<!-- 어종 이름 불러오기 명화  -->
+	<select id="Fishname" resultType="String">
+		SELECT fish_name 
+		FROM FM_Fish 
+		WHERE fish_no=(
+			SELECT fish_no 
+			FROM FM_showoff_freeboard 
+			WHERE showoff_freeboard_no=#{freeboard_no})
+	</select>
+	<!-- 어종 이름 불러오기2 명화  -->
+	<select id="Fishname2" resultType="String">
+		SELECT fish_name 
+		FROM FM_Fish 
+		WHERE fish_no=#{no}
+	</select>
+	<!-- 자랑게시판 사진 불러오기 명화 -->
+	<select id="selectByFreeboardNo" resultType="com.ej.fishingmate.vo.ShowOffImageVO">
+		SELECT * 
+		FROM FM_showoff_freeboard_image 
+		WHERE showoff_freeboard_no=#{freeboard_no}
+	</select>
+	<!-- 게시판 리스트 불러오기 명화 -->
+	<select id="selectAll" resultType="com.ej.fishingmate.vo.ShowOffVO">
+		SELECT * FROM FM_Showoff_Freeboard 
+		ORDER BY Showoff_freeboard_no DESC
+	</select>
+	<!-- 댓글 갯수 목록 명화 -->
+   <select id="commentCount" resultType="int">
+		SELECT COUNT(showoff_comment_no)
+		FROM FM_showoff_freeboard_comment WHERE showoff_freeboard_no= #{freeboard_no}
+	</select>
+	<!-- 추천 갯수 목록 명화 -->
+	<select id="selectRecommendCountByFreeboardNo" resultType="int">
+		SELECT COUNT(*) 
+		FROM FM_showoff_Freeboard_Recommend 
+		WHERE showoff_freeboard_no = #{freeboard_no}
+	</select>
+	<!-- 추천 확인 명화 -->
+	<select id="selectRecommendCountByFreeboardNoAndMemberNo" resultType="int">
+		SELECT COUNT(*) 
+		FROM FM_showoff_Freeboard_Recommend 
+		WHERE showoff_freeboard_no = #{freeboard_no} 
+		AND member_no = #{member_no}
+	</select>
+	<!-- 추천 하기 명화-->
+	<insert id="insertRecommend">
+		INSERT INTO FM_showoff_Freeboard_Recommend VALUES(
+		    FM_showoff_fb_seq.nextval,
+		    #{freeboard_no},
+		    #{member_no},
+		    SYSDATE
+		)			
+	</insert>
+	<!-- 추천 취소 명화-->
+	<delete id="deleteRecommend">
+		DELETE FROM FM_showoff_Freeboard_Recommend 
+		WHERE showoff_freeboard_no = #{freeboard_no} 
+		AND member_no = #{member_no}
+	</delete>
+	<!-- 조회수 올리기 명화-->
+	<update id="updateReadCount">
+		UPDATE FM_showoff_Freeboard 
+		SET showoff_freeboard_readcount = showoff_freeboard_readcount + 1
+		WHERE showoff_freeboard_no = #{freeboard_no}	
+	</update>
+	<!-- 댓글 삽입 명화 -->
+	<insert id="insertComment">
+	    INSERT INTO FM_showoff_freeboard_comment values(
+		    FM_showoff_fb_comment_seq.nextval,
+		    #{showoff_freeboard_no},
+		    #{member_no},
+		    #{showoff_comment_content},
+		    SYSDATE
+	    )
+   </insert>
+	<!-- 댓글 리스트 명화 -->
+	<select id="selectContentCommentByNo" resultType="com.ej.fishingmate.vo.ShowOffCommentVO">
+		SELECT * 
+		FROM FM_showoff_Freeboard_Comment
+		WHERE showoff_freeboard_no = #{no}
+		ORDER BY Showoff_comment_no DESC
+	</select>
+	<!-- 댓글 수 명화 -->
+	<select id="selectCommentCountByNo" resultType="int">
+		SELECT COUNT(*)
+		FROM FM_showoff_Freeboard_Comment
+		WHERE showoff_freeboard_no = #{no}
+	</select>
+	<!-- 댓글 삭제 명화 -->
+   <delete id="deleteComment">
+		DELETE 
+		FROM FM_showoff_Freeboard_Comment
+		where showoff_comment_no=#{commentno}
+   </delete>
+   <!-- 댓글 수정 명화 -->
+   <update id="updateComment">
+		UPDATE 
+			FM_showoff_Freeboard_Comment
+		SET 
+			showoff_comment_content = #{showoff_comment_content}
+		WHERE 
+			showoff_comment_no = #{showoff_comment_no}
+	</update>
+	<!-- 댓글 1개 불러오기 명화 -->
+	<select id="RecallComment" resultType="com.ej.fishingmate.vo.ShowOffCommentVO">
+		SELECT *
+		from FM_showoff_Freeboard_comment
+		where showoff_comment_no = #{showoff_comment_no}
+	</select>
+   <!--상위 리스트 가져오기 명화 -->
+   <select id="toplist" resultType="com.ej.fishingmate.vo.TopListVO">
+	<![CDATA[
+		SELECT * FROM(
+		SELECT ROWNUM rum, f1.* FROM(
+		SELECT f1.showoff_freeboard_no, f2.showoff_freeboard_title,f2.showoff_freeboard_readcount,
+		f2.showoff_freeboard_writedate,f3.member_nick,
+		COUNT(f1.showoff_recommend_no) recommedCount
+		FROM fm_showoff_freeboard_recommend f1, fm_showoff_freeboard f2, fm_member f3
+		WHERE f1.showoff_freeboard_no= f2.showoff_freeboard_no and f2.member_no=f3.member_no
+		GROUP BY f1.showoff_freeboard_no,f2.showoff_freeboard_title,f2.showoff_freeboard_readcount,f2.showoff_freeboard_writedate,
+		f3.member_nick
+		order by 6 DESC)f1) WHERE rum <=3
+	]]>	
+	</select>
+	<!-- 물고기 카테고리 불러오기 명화 -->
+	<select id="selectFishList" resultType="com.ej.fishingmate.vo.ShowOffFishVO">
+		SELECT * FROM FM_Fish
+	</select>
+	<!-- 물고기 총합 불러오기 명화 -->
+	<select id="selectTotalFish" resultType="int">
+		SELECT COUNT(*) FROM FM_showoff_freeboard
+	</select>
+	<!-- 어종 별 종합 불러오기 명화 -->
+	<select id="selectFish" resultType="int">
+		SELECT COUNT(*) FROM FM_showoff_freeboard where fish_no=#{fish_no}
+	</select>
+	<!-- 물고기 점수 불러오기 명화 -->
+	<select id="selectScore" resultType="int">
+		SELECT fish_score 
+		FROM FM_Fish 
+		WHERE fish_no = #{fish_no}
+	</select>
+	<!-- 경험치 증가 명화 -->
+	<update id="levelvalueadd">
+		UPDATE fm_member
+		SET	member_levelvalue = member_levelvalue + #{totalScore}
+		WHERE member_no= #{member_no}
+	</update>
+	<!-- 경험치 증가 기록 명화 -->
+	<insert id="levelvalueHistory">
+		INSERT INTO FM_levelvalue_history VALUES(
+		    FM_Levelvalue_History_seq.nextval,
+		    #{levelvalue},
+		    #{member_no},
+		    #{showoff_freeboard_levelvalue},
+		    SYSDATE
+		)
+	</insert>
+	<!-- 경험치 감소 명화 -->
+	<update id="levelvaluesub">
+		UPDATE fm_member
+		SET	member_levelvalue = member_levelvalue - #{totalScore}
+		WHERE member_no= #{member_no}
+	</update>
+	<!-- 페이징 명화 -->
+	<select id="selectFreeboardContent" resultType="com.ej.fishingmate.vo.ShowOffVO">
+		SELECT * FROM (
+			SELECT t1.* , ROWNUM rnum FROM (
+				SELECT fb.* FROM FM_showoff_freeboard fb, fm_Member mm
+				WHERE fb.member_no = mm.member_no
+				<if test="searchType != null and searchType =='title' and searchWord != null">
+				AND fb.showoff_freeboard_title LIKE '%' || #{searchWord} || '%'
+				</if>
+				<if test="searchType != null and searchType =='content' and searchWord != null">
+				AND fb.showoff_freeboard_content LIKE '%' || #{searchWord} || '%'
+				</if>
+				<if test="searchType != null and searchType =='nick' and searchWord != null">
+				AND mm.member_nick LIKE '%' || #{searchWord} || '%'
+				</if>
+				ORDER BY fb.showoff_freeboard_no DESC
+			) t1
+		) t2
+		<![CDATA[
+		WHERE t2.rnum >= (#{pageNum}-1)*4+1
+		AND t2.rnum <= #{pageNum}*4
+		]]> 
+	</select>
+	<select id="selectContentCount" resultType="int">
+		SELECT COUNT(*) FROM FM_showoff_freeboard
+	</select>
+	
+</mapper>

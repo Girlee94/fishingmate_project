@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ej.fishingmate.qna.mapper.QnaSQLMapper">
+
+
+   <select id="selectContentByNo" resultType="com.ej.fishingmate.vo.QnaVO">
+      SELECT *
+      FROM FM_Qna_Freeboard
+      WHERE qna_freeboard_no = #{no}
+   </select>
+
+
+   <select id ="createFreeboardKey" resultType="int">
+      SELECT FM_qna_freeboard_seq.nextval FROM dual
+   </select>
+   
+   
+   <insert id="insert">
+   <![CDATA[      
+      INSERT INTO FM_Qna_Freeboard VALUES(
+          #{qna_freeboard_no},
+          #{member_no},
+          #{qna_category_no},
+          #{qna_freeboard_title},
+          #{qna_freeboard_content},
+          #{qna_freeboard_pw},
+          0,
+          SYSDATE
+      )               
+   ]]>
+   </insert>
+
+
+    <delete id="deleteContent">
+      DELETE 
+      FROM FM_qna_freeboard
+      WHERE qna_freeboard_no = #{qna_freeboard_no} 
+   </delete>
+   
+   
+   <update id="updateContent">
+      UPDATE    fm_qna_freeboard 
+      SET    qna_freeboard_title = #{qna_freeboard_title}, 
+            qna_freeboard_content = #{qna_freeboard_content} 
+
+      WHERE    qna_freeboard_no = #{qna_freeboard_no}      
+   </update>
+   
+   
+   <select id="selectQnaCategoryList" resultType="com.ej.fishingmate.vo.QnaCategoryVO">
+      SELECT * 
+      FROM FM_Qna_Category 
+      ORDER BY qna_category_no ASC
+   </select>
+   
+   <select id="selectQnaCategoryVO" resultType="com.ej.fishingmate.vo.QnaCategoryVO">
+      SELECT * 
+      FROM FM_Qna_Category 
+      WHERE qna_category_no = #{qna_category_no}
+   </select>
+   
+
+   <insert id="insertComment">
+      INSERT INTO fm_qna_freeboard_comment values(
+         FM_Qna_Freeboard_Comment_seq.nextval,
+         #{qna_freeboard_no},
+         #{member_no},
+         #{manager_no},
+         #{qna_comment_content},
+         SYSDATE
+      )
+   </insert>
+   
+   
+   <!-- 댓글 수정 -->
+   <update id="modifyCommentByMnoAndCno">
+         UPDATE fm_qna_freeboard_comment
+      SET qna_comment_content = #{qna_comment_content}
+      WHERE member_no = #{member_no}
+      AND qna_comment_no = #{qna_comment_no}
+   </update>
+   
+      
+      <!-- 댓글 삭제 -->
+   <delete id="deleteComment">
+      DELETE 
+      FROM fm_qna_freeboard_comment
+      WHERE member_no = #{member_no}
+   </delete>
+   
+   
+   <!-- 댓글 갯수 -->
+   <select id="commentCount" resultType="int">
+      SELECT COUNT(qna_comment_no)
+      FROM fm_qna_freeboard_comment 
+      WHERE qna_freeboard_no= #{qna_freeboard_no}
+   </select>
+   
+   
+   <!-- 댓글 1개 불러오기 -->
+   <select id="selectCommentByMnoAndCno" resultType="com.ej.fishingmate.vo.QnaCommentVO">
+         SELECT * 
+      FROM fm_qna_freeboard_comment
+      WHERE member_no= #{member_no} 
+      AND qna_comment_no = #{qna_comment_no}
+   </select>
+   
+   
+   <!-- 댓글 전체 불러오기 -->   
+   <select id="selectAllContentCommentByNo" resultType="com.ej.fishingmate.vo.QnaCommentVO">
+      SELECT * 
+      FROM FM_Qna_Freeboard_Comment 
+      WHERE qna_freeboard_no = #{qna_freeboard_no}
+   </select>
+
+   <!-- 댓글 전체 불러오기 -->   
+   <select id="selectAllContentAdminCommentByNo" resultType="com.ej.fishingmate.vo.QnaCommentVO">
+      SELECT * 
+      FROM FM_Qna_Freeboard_Comment 
+      WHERE qna_freeboard_no = #{qna_freeboard_no}
+      AND manager_no != 0
+   </select>
+   
+   
+   <select id="selectCommentCountByNo" resultType="int">
+      SELECT COUNT(*)
+      FROM FM_Qna_Freeboard_Comment
+      WHERE qna_freeboard_no = #{no}
+   </select>
+
+   <select id="selectCommentAdminCountByNo" resultType="int">
+      SELECT COUNT(*)
+      FROM FM_Qna_Freeboard_Comment
+      WHERE qna_freeboard_no = #{no}
+      AND manager_no != 0
+   </select>
+   
+   
+   <update id="updateReadCount">
+      UPDATE FM_Qna_Freeboard 
+      SET qna_freeboard_readcount = qna_freeboard_readcount + 1
+      WHERE qna_freeboard_no = #{qna_freeboard_no}   
+   </update>
+
+   
+   <select id="selectAll" resultType="com.ej.fishingmate.vo.QnaVO">
+      SELECT * FROM FM_Qna_Freeboard 
+      ORDER BY qna_freeboard_no DESC
+   
+   </select>
+   <select id="selectByCategoryNo" resultType="com.ej.fishingmate.vo.QnaVO">
+      SELECT * FROM FM_Qna_Freeboard
+      WHERE QNA_CATEGORY_NO = #{qna_category_no} 
+      ORDER BY qna_freeboard_no DESC
+   
+   </select>
+
+   <select id="contentpassword" >
+      SELECT * FROM FM_qna_freeboard_pw
+      WHERE qna_freeboard_pw = #{qna_freeboard_pw}
+   </select>
+
+
+<!--    
+   페이징 
+   <select id="selectFreeboardContent" resultType="com.ej.fishingmate.vo.QnaVO">
+      SELECT * FROM (
+         SELECT t1.* , ROWNUM rnum FROM (
+            SELECT fb.* FROM FM_Qna_freeboard fb, fm_Member mm
+            WHERE fb.member_no = mm.member_no
+            <if test="searchType != null and searchType =='title' and searchWord != null">
+            AND fb.qna_freeboard_title LIKE '%' || #{searchWord} || '%'
+            </if>
+            <if test="searchType != null and searchType =='content' and searchWord != null">
+            AND fb.qna_freeboard_content LIKE '%' || #{searchWord} || '%'
+            </if>
+            <if test="searchType != null and searchType =='nick' and searchWord != null">
+            AND mm.member_nick LIKE '%' || #{searchWord} || '%'
+            </if>
+            ORDER BY fb.qna_freeboard_no DESC
+         ) t1
+      ) t2
+      <![CDATA[
+      WHERE t2.rnum >= (#{pageNum}-1)*10+1
+      AND t2.rnum <= #{pageNum}*10
+      ]]> 
+   </select>
+ -->   
+</mapper>

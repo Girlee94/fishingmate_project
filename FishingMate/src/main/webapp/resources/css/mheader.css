@@ -1,0 +1,15 @@
+@charset "UTF-8";
+#adindex_navbar {
+	background-color:#5c85d6;
+	font-family: 'Source Sans Pro', sans-serif; 
+	font-size: 20px;
+}
+
+#fishing {
+	font-family: 'Source Sans Pro', sans-serif; 
+	font-size: 66px;	
+}
+
+#adindex_navbar a, #adindex_navbar button{
+	color: white;
+}

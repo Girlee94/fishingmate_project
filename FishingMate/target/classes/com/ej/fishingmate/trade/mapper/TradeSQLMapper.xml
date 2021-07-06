@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ej.fishingmate.trade.mapper.TradeSQLMapper">
+
+	<select id="selectItemCategoryList" resultType="com.ej.fishingmate.vo.ItemCategoryVO">
+		
+		SELECT * FROM FM_Item_Category
+	
+	</select>
+	<insert id="insert">
+		INSERT INTO FM_Trade_Freeboard VALUES(
+		    #{trade_freeboard_no}, 
+		    #{member_no},
+		    1, 
+		    #{item_category_no}, 
+		    #{trade_freeboard_title},
+		    #{trade_freeboard_content},
+		    0,
+		    SYSDATE,
+		    0,
+		    #{trade_freeboard_itemprice}
+		)
+	
+	</insert>
+	
+	<select id="createFreeboardKey" resultType="int">
+		SELECT FM_Trade_Freeboard_seq.nextval FROM dual
+	</select>
+	
+	<select id="selectAll" resultType="com.ej.fishingmate.vo.TradeVO">
+		SELECT * FROM FM_Trade_Freeboard 
+		ORDER BY trade_freeboard_no DESC
+	</select>
+	
+	<select id="selectContentByNo" resultType="com.ej.fishingmate.vo.TradeVO">
+		SELECT * FROM FM_Trade_Freeboard
+		WHERE trade_freeboard_no=#{trade_freeboard_no}
+	
+	</select>
+	
+	<select id="selectItemByNo" resultType="com.ej.fishingmate.vo.ItemCategoryVO">
+		SELECT * FROM FM_Item_Category WHERE item_category_no=#{item_category_no}
+	</select>
+	
+	<update id="modifyTradeContentByNo">
+	    UPDATE FM_Trade_Freeboard
+	   SET trade_freeboard_title = #{trade_freeboard_title}
+       ,trade_freeboard_itemprice= #{trade_freeboard_itemprice}
+       , trade_freeboard_content=#{trade_freeboard_content}
+	   WHERE trade_freeboard_no= #{trade_freeboard_no}
+	</update>
+	
+	<delete id="deleteContentByNo">
+		DELETE FROM FM_Trade_Freeboard
+	    WHERE trade_freeboard_no=#{trade_freeboard_no}
+	</delete>
+	
+	<!--조회수  -->
+	<update id="contentReadCount">
+		UPDATE FM_Trade_Freeboard
+		SET trade_freeboard_readcount = trade_freeboard_readcount+1
+		WHERE trade_freeboard_no=#{trade_freeboard_no}
+	
+	</update>
+	
+	<!--댓글  -->
+	<insert id="insertComment">
+		INSERT INTO FM_Trade_Freeboard_Comment VALUES(
+		    FM_Trade_Freeboard_Comment_seq.nextval,
+		    #{member_no},
+		    #{trade_freeboard_no},
+		    #{trade_comment_content},
+		    SYSDATE
+		)
+	
+	</insert>
+	
+	<select id="selectCommentByNo" resultType="com.ej.fishingmate.vo.TradeCommentVO">
+		SELECT * FROM FM_Trade_Freeboard_Comment 
+		WHERE trade_freeboard_no=#{trade_freeboard_no}
+		ORDER BY 1 DESC
+	
+	</select>
+	
+	<select id="tradeCommentCount" resultType="int">
+		SELECT COUNT(*) FROM FM_Trade_Freeboard_Comment WHERE trade_freeboard_no=#{trade_freeboard_no}
+	</select>
+	
+	<delete id="deleteComment">
+		DELETE FROM FM_Trade_Freeboard_Comment WHERE trade_comment_no = #{no}	
+	</delete>
+	
+	<update id="modifyTradeCommentByNo">
+	   UPDATE FM_Trade_Freeboard_Comment
+	   SET trade_comment_content = #{trade_comment_content}
+	   WHERE trade_comment_no= #{trade_comment_no}
+	</update>
+	
+	<!-- 추천/찜 -->
+	<insert id="increaseWishitem">
+		INSERT INTO FM_Trade_Freeboard_Recommend VALUES (
+		    FM_Trade_Fb_Recommend_seq.nextval,
+		    #{trade_freeboard_no},
+		    #{member_no},
+			SYSDATE  
+		)
+	
+	</insert>
+	
+	<delete id="decreaseWishitem">
+	    DELETE FROM FM_Trade_Freeboard_Recommend
+		WHERE trade_freeboard_no=#{trade_freeboard_no} 
+		AND member_no=#{member_no}
+	</delete>
+	
+	<select id="chkWishCount" resultType="int">
+		SELECT COUNT(*) FROM FM_Trade_Freeboard_Recommend
+        WHERE trade_freeboard_no=#{trade_freeboard_no} 
+		AND member_no=#{member_no}
+	
+	</select>
+	
+	<select id="selectTradeFreeboardWishCount" resultType="int">
+	    SELECT COUNT(*)
+		FROM FM_Trade_Freeboard_Recommend
+		WHERE trade_freeboard_no = #{trade_freeboard_no}
+	
+	</select>
+	
+	<!--중고거래 신청 중립이 N/ 거절 R / 판매완료 Y /평가 완료 C -->
+	<insert id="insertApply">
+		INSERT INTO FM_Trade_List VALUES(
+		    FM_Trade_List_seq.nextval,
+		    #{trade_freeboard_no},
+		    #{member_no},
+		    #{trade_list_phone},
+		    #{trade_list_content},
+		    'N'
+		)
+	</insert>
+
+	<select id="selectTradeListByMemberNoCount" resultType="int">
+		SELECT COUNT(*) FROM FM_Trade_List WHERE member_no = #{member_no} and trade_freeboard_no =#{trade_freeboard_no}
+	</select>
+
+	<select id="selectTradeListByFreeboardNo" resultType="com.ej.fishingmate.vo.TradeListVO">
+		SELECT * FROM FM_Trade_List WHERE trade_freeboard_no = #{trade_freeboard_no}
+	</select>
+    
+    <!--신청자 수  -->
+    <select id="numberOfApplicant" resultType="int">
+    	SELECT COUNT(*) FROM fm_trade_list WHERE trade_freeboard_no= #{trade_freeboard_no}
+    </select>
+    
+    <!--중고거래 APPROVE 바꾸기  -->
+    
+    <update id="rejectTradeByListNo">
+      UPDATE FM_Trade_List
+	  SET trade_list_approve='R'
+      WHERE trade_list_no=#{trade_list_no}
+    </update>
+    
+    <update id="sellTradeByListNo">
+      UPDATE FM_Trade_List
+	  SET trade_list_approve='Y'
+      WHERE trade_list_no=#{trade_list_no}
+    </update>
+      
+    
+    <!--구매자에게 거절 알림창 띄우기  -->
+    <select id="rejectPopupMemberNo" resultType="string">
+    	SELECT * FROM(SELECT trade_list_approve 
+        FROM FM_Trade_List 
+        WHERE trade_freeboard_no =#{trade_freeboard_no} AND member_no=#{sessionMemberNo} 
+        ORDER BY trade_list_no DESC) WHERE ROWNUM =1
+    </select>
+    
+    <!-- 구매자 이름 -->
+    <select id="selectTradeListByTradeListNo" resultType="com.ej.fishingmate.vo.TradeListVO">
+		SELECT * FROM FM_Trade_List WHERE trade_list_no =#{trade_list_no}
+	</select>
+	
+	<!--평가 정보-->
+	<insert id="evaluateInfo">
+		INSERT INTO FM_Trade_Evaluate VALUES(
+		FM_Trade_Evaluate_seq.nextval,
+		#{buyer_member_no},
+		#{seller_member_no},
+		#{evaluate_value},
+		#{evaluate_content}
+		)
+	</insert>
+	
+	<!--매너점수 평균  -->
+	<select id="evaluateAvgByMemberNo" resultType="double">
+		SELECT NVL(AVG(evaluate_value) , 5)
+		FROM fm_trade_evaluate 
+		WHERE buyer_member_no = #{buyer_member_no}
+	</select>
+	
+	<!--맴버 매너 점수 업데이트  -->
+	<update id="memberEvaluateUpdate">
+		UPDATE FM_Member_Evaluate
+		SET member_evaluate_value = #{member_evaluate_value}
+		WHERE member_no = #{buyer_member_no}
+	</update>
+	
+	<!--맴버 매너 점수 값  -->
+	<select id="mannerValue" resultType="double">
+		SELECT member_evaluate_value FROM FM_Member_Evaluate WHERE member_no=#{buyer_member_no}
+	</select>
+	
+	<!-- 평가 완료  -->
+	<update id="completeEvaluate">
+      UPDATE FM_Trade_List
+	  SET trade_list_approve='C'
+      WHERE trade_list_no=#{trade_list_no}
+    </update>
+    
+    <!--거래 완료된거  -->
+    <select id="completePurchaseCount" resultType="int">
+    	SELECT COUNT(*) FROM FM_Trade_List WHERE trade_list_approve='C' and trade_freeboard_no=#{trade_freeboard_no}
+    </select>
+    <!--재거래 하기 위해 기존 데이터 지우기  -->
+    <!--  
+    <delete id="deleteTradeListForReTrade">   
+    	DELETE FROM FM_Trade_List WHERE trade_freeboard_no =#{trade_freeboard_no} and member_no=#{member_no}
+    </delete>
+    
+    <update id="updateApproveToN">
+      UPDATE FM_Trade_List
+	  SET trade_list_approve='N'
+      WHERE trade_freeboard_no =#{trade_freeboard_no} and member_no=#{member_no} and trade_list_approve='R' 
+    </update>
+    -->
+    
+    
+    <!-- 통계용 -->
+    <select id="getCountByDate" resultType="map">
+	    SELECT TO_CHAR(trade_freeboard_writedate , 'MM-DD') as tr_date , COUNT(*) as tr_cnt
+		FROM FM_Trade_Freeboard 
+		WHERE trade_freeboard_writedate >= SYSDATE - 7
+		GROUP BY TO_CHAR(trade_freeboard_writedate , 'MM-DD')
+		ORDER BY tr_date ASC
+    </select>
+    
+    <select id="getCountByGender" resultType="map">
+		select fmm.member_gender as t_gender, COUNT(*) as t_cnt from fm_trade_freeboard fmt, fm_member fmm
+		where fmt.member_no = fmm.member_no
+		group by fmm.member_gender    
+    </select>
+    
+    <!--판매 거절일때   -->
+    <select id="tradeCompleteSell" resultType="int">
+      SELECT COUNT(*) FROM FM_Trade_List WHERE trade_freeboard_no=#{trade_freeboard_no} AND trade_list_approve='C'
+    </select>
+    
+</mapper>
+
+
+
+
+

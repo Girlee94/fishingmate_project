@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ej.fishingmate.mate.mapper.MateImageSQLMapper">
+	
+	<!-- 메이트 게시판 글쓰기-사진 올리기 - 형준 -->
+	<insert id="insertMateFreeboardImage">
+		INSERT INTO FM_Mate_Freeboard_Image VALUES (
+		   	FM_Mate_Freeboard_Image_seq.nextval,
+		    #{mate_freeboard_no},
+		    #{image_location},
+		    #{image_original_filename}
+		)
+	</insert>
+	
+	<!-- 메이트 게시판 사진 불러오기 - 형준 -->
+	<select id="selectMateFreeboardImage" resultType="com.ej.fishingmate.vo.MateFreeboardImageVO">
+		SELECT * 
+		FROM FM_Mate_Freeboard_Image 
+		WHERE mate_freeboard_no=#{mate_freeboard_no}
+	</select>
+	
+	<!-- 메이트 게시판 이미지 한장 불러오기 - 형준 -->
+	<select id="selectMateFreeboardOneImage" resultType="com.ej.fishingmate.vo.MateFreeboardImageVO">
+		SELECT ROWNUM rnum, t1.*
+		FROM
+		(
+		    SELECT * 
+		    FROM FM_Mate_Freeboard_Image
+		    WHERE mate_freeboard_no = #{mate_freeboard_no}
+		) t1
+		WHERE ROWNUM = 1
+	</select>
+	
+	<!-- 메이트 게시판 이미지 삭제 - 형준 -->
+	<delete id="deleteMateFreeboardImage">
+		DELETE FROM FM_Mate_Freeboard_Image
+		WHERE mate_freeboard_no = #{mate_freeboard_no}
+	</delete>
+
+</mapper>

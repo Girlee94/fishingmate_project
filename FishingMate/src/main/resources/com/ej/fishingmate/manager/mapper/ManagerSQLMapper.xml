@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ej.fishingmate.manager.mapper.ManagerSQLMapper">
+
+	<select id="createManagerKey" resultType="int">
+		SELECT FM_Manager_seq.nextval 
+		FROM Dual	
+	</select>
+
+	<!-- 관리자 인서트 -주빈 -->
+	<insert id="insertmanager">
+		INSERT INTO FM_Manager VALUES(
+		    #{manager_no},
+		    #{grade_no},
+		    #{manager_id},
+		    #{manager_pw},
+		    #{manager_name},
+		    #{manager_nick},
+		    #{manager_phone},
+		    #{manager_email},
+		    SYSDATE
+		)
+	</insert>
+	
+	<!-- 관리자 로그인-주빈 -->
+	<select id="selectByIdAndPwAdm" resultType="com.ej.fishingmate.vo.ManagerVO">
+		SELECT * FROM FM_Manager
+		WHERE manager_id=#{manager_id}
+		AND manager_pw=#{manager_pw}
+	</select>
+	
+	<!-- 관리자 번호로 매니저VO 불러오기-주빈 -->
+	<select id="selectByManagerNo" resultType="com.ej.fishingmate.vo.ManagerVO">
+		SELECT * FROM FM_Manager
+		WHERE manager_no = #{manager_no}
+	</select>
+	
+	<!-- 축제 게시글 읽기 -주빈  -->
+	<select id="selectEventByNo" resultType="com.ej.fishingmate.vo.EventVO">
+		SELECT * FROM FM_Event_Freeboard  
+		WHERE event_freeboard_no = #{event_freeboard_no}
+	</select>
+	
+	<!-- 축제 게시글 관리자 수정-주빈 -->
+	<update id="updateEventVO">
+		UPDATE FM_Event_Freeboard 
+		SET event_freeboard_title = #{event_freeboard_title}, event_freeboard_content = #{event_freeboard_content}
+		WHERE event_freeboard_no = #{event_freeboard_no}
+	</update>
+	
+	<!-- 축제 게시글 관리자 승인-주빈 -->
+	<update id="updateApprove">
+		UPDATE FM_Event_Freeboard 
+		SET event_freeboard_approve = 'Y'
+		WHERE event_freeboard_no = #{event_freeboard_no}
+	</update>
+	
+	<!-- 축제 게시글 관리자 승인 취소-주빈 -->
+	<update id="updateDerecog">
+		UPDATE FM_Event_Freeboard 
+		SET event_freeboard_approve = 'N'
+		WHERE event_freeboard_no = #{event_freeboard_no}
+	</update>
+	
+	<!-- 관리자 승인이 되었는지 아닌지 판단-주빈 -->
+	<select id="selectAdminApprove" resultType="String">
+		SELECT event_freeboard_approve 
+		FROM FM_Event_Freeboard
+		WHERE event_freeboard_no=#{event_freeboard_no}
+	</select>
+		
+	<!-- 관리자 승인 된 글만 불러오기-주빈 -->
+	<select id="selectAdmApChecked" resultType="com.ej.fishingmate.vo.EventVO">
+		SELECT * FROM FM_Event_Freeboard
+		WHERE event_freeboard_approve='Y'
+	</select>
+
+	<!-- 승인 전인 글만 불러오기-주빈 -->
+	<select id="selectAdmApBefore" resultType="com.ej.fishingmate.vo.EventVO">
+		SELECT * FROM FM_Event_Freeboard
+		WHERE event_freeboard_approve='N'
+	</select>
+	
+</mapper>

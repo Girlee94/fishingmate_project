@@ -1,0 +1,6 @@
+@charset "UTF-8";
+#review_list img{
+	width: 192px;
+	height: 148px;
+	cursor: pointer;
+}

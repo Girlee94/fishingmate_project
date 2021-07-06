@@ -1,0 +1,47 @@
+@charset "UTF-8";
+
+#index_navbar{
+	/* background-color:#002080; */
+	/* background-color: #87CEFA; */
+	/* background-color: #7B68EE; */
+	font-size: 15px;
+}
+
+#header_logo {
+	
+	width: 168px;
+    height: 50px;
+	cursor: pointer;
+}
+
+#index_navbar a {
+	color: black;
+	font-weight: bold;
+	text-decoration:none;
+	font-size: 20px;
+}
+
+.dropdown-menu {
+	background-color:white;
+}
+
+#top_nav {
+	font-size: 15px;
+}
+
+#carousel-item-img{
+	height: 430px;
+}
+#takepartinto{
+	height: 100px;
+	width: 250px;
+}
+
+#fishing {
+	font-size: 66px;	
+}
+
+#adindex_navbar {
+	background-color:#5c85d6;
+	font-size: 20px;
+}

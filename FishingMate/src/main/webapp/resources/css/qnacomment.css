@@ -1,0 +1,22 @@
+@charset "UTF-8";
+#manager_comment_content {
+	background-color: Ivory;
+	border: 1px;
+}
+#member_comment_content {
+	background-color: Ivory;
+	border: 1px;
+}
+#modify__member_btn {
+	background-color: saddlebrown;
+}
+	
+
+#image_content img {
+	max-width: 100%;
+	height: auto;
+	display: block;
+}
+
+
+

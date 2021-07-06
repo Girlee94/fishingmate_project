@@ -1,0 +1,20 @@
+@charset "UTF-8";
+
+#fishing-footer{
+
+	background-color:  #323232;
+	color: white;
+	padding-top: 50px;
+	padding-bottom: 50px;
+/* 	height: 200px; */
+/* 	background-image: url("/fishingmate/resources/img/footer_img2.png"); */
+}
+
+
+#admin_footer{
+	background-color:  #5c85d6;
+}
+
+#admin_footer_p{
+	color: #ffffff;
+}
